@@ -15,7 +15,7 @@ CFLAGS = -Wall -Werror -g -DBRANCHING
 CFLAGS += -Wno-error=unused-but-set-variable
 
 
-all: branching_run testalu
+all: branching_run testalu convert
 
 
 branching_run: $(OBJECTS)
@@ -23,6 +23,9 @@ branching_run: $(OBJECTS)
 
 testalu: alu.o bus.o testalu.o
 	$(CC) $(CFLAGS) -o testalu $^ $(LDFLAGS)
+convert: convert.c
+	$(CC) $(CFLAGS) -o convert $^ $(LDFLAGS)
+
 
 clean:
 	rm -f *.o branching_run testalu *~

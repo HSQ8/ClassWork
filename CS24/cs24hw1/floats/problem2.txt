@@ -1,7 +1,31 @@
 Part A:
 -------
+Why are these results different?
+the results are different because of the way that floating point representation is implemented.
+Floating point values are implemented with a series of significant digits and then the power of 10 that 
+dictates the location of the decimal place. Thus, when we have two numbers that differ greatly in their order of magnitudes,
+the value part of the floating point value cannot both hold the high end value and the low end value, because there are two 
+many zeros between the two segments. Thus, if we add the two numbers together, we will invariably lose the lower significant 
+digits. 
+
+Thus, when we add in the order from low to high, we will slowly lose the lower significant bits. As we add from high to low, we will
+add the high bits and lose all lower bits after a  threshold. Thus, it is quite obvious that adding from low to high is more accurate since we would have accounted for any carries as we add from the lower end, which might inevitably be discarded, but their carries will not 
+if they make it into a higher bit. Whereas adding from high to low will always lose all potentials of carrying from the low bits.
 
 
+Of the three approaches that 
+fsum uses, which is the most accurate, and why?
+
+As outlined in the previous answer, adding from low to high is the most accurate.
+
+
+What kinds of inputs would 
+also  cause the “most accurate” approach to exhibit large error
+
+inputs where there is not a natural step progression of numbers magnitudes, where the input population is polarized on 
+opposite ends of the magnitude spectrum
+
+input that 
 
 Part B:
 -------

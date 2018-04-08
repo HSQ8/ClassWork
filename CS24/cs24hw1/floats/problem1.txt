@@ -1,5 +1,21 @@
 CS:APP3e Practice Problem 2.46, pp.111-112:
 -------------------------------------------
+A) what is the binary representation of 0.1 - x
+0.1110011001100110011
+you just do bitwise and with
+1.00000.....0 and the original x they give you.
+
+B) what is the approximate decimal value of 0.1-x
+you can multiply it out like so
+1 * 2^-1 + 1 * 2 ^ -2 ....
+= 9.53674316 * 10^(-8)
+
+C)
+we take the previous answer and multiple
+100 * 3600 * 9.53674316 * 10^(-8) = 0.343322754 seconds,
+or 0.0343 due to sig fig
+
+D)0.0343 * 2000 = 68.7 meters
 
 
 

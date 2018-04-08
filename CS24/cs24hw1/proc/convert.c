@@ -140,8 +140,8 @@ int prepare(int line_no, char *input, char *clean, char *comment) {
  * we don't need to worry about signed/unsigned issues.
  */
 uint32_t convert(const char *bits) {
-    int length;
-    uint32_t value;
+    int length, count;
+    uint32_t value = 0;
 
     assert(bits != 0);
 
@@ -161,6 +161,13 @@ uint32_t convert(const char *bits) {
     /*        variable to the actual value represented by that     */
     /*        string of bits.                                      */
     /*=============================================================*/
+    for(count = 0; count < length - 1; ++count){
+        char c = bits[count];
+        value += c - '0';
+        value *= 2;
+    }
+    value += bits[length - 1] - '0';
+
 
     return value;
 }

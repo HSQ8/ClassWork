@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "branch_unit.h"
-#include "instruction.h"
+#include "instruction.h" 
 
 
 /*
@@ -60,8 +60,14 @@ void branch_test(BranchUnit *bru) {
     /* TODO:  If aluop is BNZ, and A is nonzero, set bru->branch to BRANCH. */
     /*        Otherwise, set bru->branch to NOBRANCH.                       */
     /*                                                                      */
-    /*        Use pin_set(bru->branch, ...) to set the value on the bus.    */
+    /*        Use pin_set(bru->branch, ...) to set the value on the bus.
+    done    */
     /*======================================================================*/
+    if(aluop == ALUOP_BNZ && A != 0){
+        pin_set(bru->branch, BRANCH);
+    }else{
+        pin_set(bru->branch, NOBRANCH);
+    }
 
 }
 
