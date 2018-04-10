@@ -89,9 +89,9 @@ void alu_eval(ALU *alu) {
            /*!< The opcode for bitwise and. */
         case ALUOP_SRA :
         result = A >> 1;
-        temp = A & (0x8000000);
+        temp = A & (0x80000000);
         if(temp > 0){
-            result = result | 0x8000000;
+            result = result | 0x80000000;
         }
         break;
            /*!< The opcode for arithmetic shift-right. */
