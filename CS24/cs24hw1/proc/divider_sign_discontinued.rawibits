@@ -1,0 +1,25 @@
+#   R3 <- R1 >> 31   get most significant bit of divisor
+#   R4 <- R0 >> 31   get most significant bit of dividend
+0001 1 100 000 100  #   R4 <- ~R4
+1010 0 0100 TOGGLEDIVIDEN   #   BNZ R4, TOGGLEDIVIDEN   if positive, branch and skip, so we must toggle all negative bits
+0010 1 101 000 000  #   R0 <- R5 - R0            removes the leading 1 bit for sign
+0001 1 011 000 011  #   R3 <- ~R3 (TOGGLEDIVIDEND:)
+1010 0 0011 TOOGLEDIVISOR   #   BNZ R3, TOOGLEDIVISOR if positive, branch and skip,so we toggle positive bits to negative
+0010 1 101 001 001  #   R1 <- R5 - R1
+0000 1 000 101 111  #   R7 <- R0 + R5  (TOGGLEDIVISOR:)   set remainder <- dividend + 0 (constant); R6 <- 0 read in
+0010 1 111 001 111  #   R7 <- R7 - R1  (WHILE:TOP) true
+#   R2 <- R7 >> 31    extract sign bit, if negative (1), then we have broken condition of loop, then we exit to
+1010 0 0010 DONELOOP   #   BNZ R2, DONELOOP if remainder ><- 0, we don't branch, we increment R6, else we goto DONE
+0101 1 110 000 110  #   R6 <- R6 + 1
+1010 0 001 WHILE  #   BNZ TRUE, WHILE        force goto while loop
+0000 1 111 001 111  #   R7 <- R7 + R1  DONELOOP:
+1010 0 011 TOOGLEDIVISORAGAIN  #   BNZ R3, TOOGLEDIVISORAGAIN  R3 is 0 means we toggled before, so we toggle again(done skip) 
+0010 1 101 001 001  #   R1 <- R5 - R1
+1010 0 100 TOGGLEDIVIDENAGAIN  #   BNZ R4, TOGGLEDIVIDENAGAIN  (TOOGLEDIVISORAGAIN:) if R4 is 0, this means we already toggle, so toggle again
+0010 1 101 000 000  #   R0 <- R5 - R0            removes the leading 1 bit for sign
+0011 1 011 100 011  #   R3 <- R3 XOR R4  (TOGGLEDIVIDENAGAIN:) get sign of division, 1 for negative, 0 for positive
+0001 1 011 000 011  #   R3 <- ~R3      if R3 is 1, meaning yes negate, then we toggle R3 to be zero so we don't skip the negate block
+1010 0 011 RETURN  #   BNZ R3, RETURN
+0010 1 101 111 111  #   R7 <- R5 - R7;
+1111 0 000 000 000 #   DONE: (RETURN:) 
+

@@ -1,0 +1,10 @@
+22f    # R7 <- R0 + R5    set remainder <- dividend + 0 (constant); R6 <- 0 read in
+bcf    # R7 <- R7 - R1  (WHILE:TOP) true, also subtract divisor from remainder
+23da    # R2 = R7 AND R3  # mask to extract high bit
+2886    # BNZ R2, DONELOOP if remainder >= 0, we don't branch, we increment R6, else we goto DONELOOP
+1786    # R6 <- R6 + 1   increment quotient;
+2901    # BNZ TRUE, WHILE force goto while loop, always true by reading the true constant register.
+3cf    # R7 <- R7 + R1  (DONELOOP:)  adds divisor back to remainder to get positive remainder.
+3c00    # DONE
+ffffffff    
+ffffffff    

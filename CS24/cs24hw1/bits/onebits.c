@@ -30,17 +30,17 @@ int main(int argc, char **argv) {
 /*
  * Given an unsigned integer n, this function returns the number of bits in n
  * that are 1.
+ * this program works by always "and"ing the lowest bit, and if it counts a 1, increment counter
+ * then right shifting until all 1 bits have been processed.
  */
 int count_onebits(unsigned int n) {
-    unsigned long count = 0;
+    unsigned int count = 0;
     while(n != 0){
         if(n & 0x01){
             count ++;
         }
         n = n >> 1;
     }
-
-
     return count;
 }
 

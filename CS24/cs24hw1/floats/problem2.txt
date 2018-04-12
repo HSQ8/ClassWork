@@ -17,7 +17,7 @@ Of the three approaches that
 fsum uses, which is the most accurate, and why?
 
 As outlined in the previous answer, adding from low to high is the most accurate.
-
+we can conpensate partially for losing lower bit values if we add from low to high, as we accumulate carries which can "make it" into the bits that don't get discarded
 
 What kinds of inputs would 
 also  cause the “most accurate” approach to exhibit large error
@@ -25,11 +25,15 @@ also  cause the “most accurate” approach to exhibit large error
 inputs where there is not a natural step progression of numbers magnitudes, where the input population is polarized on 
 opposite ends of the magnitude spectrum
 
-input that 
+also, the larger the input set, the more the error, since we lose more potential bits. this is quite obvious.
 
 Part B:
 -------
 
+Pairwise summation is more accurate because it adds two numbers at a time, which allows magnitude to accumulate and has the chance of not getting cut by summing a small number with a really large number. Probabilistically speaking, if there is one huge value among lots of smaller values, then naive summation would lose all such smaller values due to the sum cutting off all such smaller values due to finite precision. But in pairwise sum, this effect is contained to one base case pair, which cascades up, allowing the sums in the other recursive branches to first sum up (in crease in magnitude) and have a chance at carrying and adding into a significant digit.
 
+
+
+*Note, I check my program over and over, there seems to be 400,000 bytes of memory leaked regardless of whether I write my function or not, so I think the leak might be inherent and not part of my my_sum() implementation.
 
 

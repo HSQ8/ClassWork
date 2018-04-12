@@ -1,0 +1,1 @@
+what happens with this program is that it never terminates due to each time we decrement remainder by divisor, but it remains unchanged due to divisor = 0, thus the program keeps looping without changing any values because we never hit the sign change needed to break the loop.

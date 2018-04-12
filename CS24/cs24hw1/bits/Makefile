@@ -12,7 +12,7 @@
 # Alternatively, one can type "make clean" to run the clean rule, or
 # "make clean all" to invoke multiple build targets.
 
-all: faster_onebits
+all: faster_onebits onebits
 
 # This rule specifies how to generate the faster_onebits program, if we also have
 # faster_onebits.o.  If faster_onebits.o doesn't exist, make will use the rule for faster_onebits.o

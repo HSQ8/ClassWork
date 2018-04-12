@@ -1,7 +1,7 @@
 Expression:  n = n & (n - 1)
 ----------------------------
 what does this expressio do to n?
->> this expression removes one true bit from a byte
+>> this expression removes one true bit from the sequence of 1s and 0s.
 How does it work?
 it does this by subtracting one from the unsigned value , and then
 applying binary and. Since each subtraction of 1 would skip over blocks
@@ -10,7 +10,8 @@ we, applying that result with the original and, which would remove the first
 instance of 1 bit that it encounters.
 
 How might it provide a faster way to count one bits in a value?
-it works by skipping loops where we iterate over zero values,
-thus saving computation.
+
+instead of shifting one at a time as my algorithm did, it works by skipping loops where we iterate over zero values,
+thus saving computation. 
 
 

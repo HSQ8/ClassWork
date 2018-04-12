@@ -54,9 +54,15 @@ void alu_eval(ALU *alu) {
 
     switch(aluop){
         case ALUOP_POS:
+        //I didn't see a description for this in the 
+        // appendix
         break;
 
         case ALUOP_MASK:
+        // I also didn't see a description for this in
+        // the appendix, but will go ahead and implement
+        // based on what I know
+        result = A & B;
         break;
 
         case ALUOP_ADD :

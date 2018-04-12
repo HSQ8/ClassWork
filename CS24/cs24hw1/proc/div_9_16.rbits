@@ -1,0 +1,13 @@
+0009    # dividend    R0     
+0010    # divisor      R1
+0000    #  this is the if block variable,a copy of remainder, but used to extract sign.  R 2
+80000000    # mask to extract sign R3
+0001    # true constant R4
+0000    # constant 0   R5
+0000    # quotient  R6
+0000    # remainder R 7
+
+
+
+
+
