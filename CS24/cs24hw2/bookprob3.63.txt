@@ -2,31 +2,31 @@ Answer to Problem 3.63, CS:APP3e pp.314-315
 -------------------------------------------
 
 
-n = n - 16
+n = n - 60
 compare 5 with n
 if 5 > n, goto square
 jump to M[index]
 
-#4005a1   rsi = 1,3
+#4005a1   rsi = 0,2
 rax = x * 8 
 return rax
 
-#4005aa rsi = 4
+#4005aa rsi = 3
 rax = x
 rax = 3  * rax
 return rax
 
-#4005b2  rsi = 5
+#4005b2  rsi = 4
 rax = x
 rax = rax * 16
 rax = rax - x
 x = rax
 /*fall through*/
 
-:4005bf  rsi = 6
+:4005bf  rsi = 5
 x = x * x
 
-: 4005c3  rsi = 2
+: 4005c3  rsi = 1
 rax = 75 + x 
 return rax
 
@@ -34,19 +34,22 @@ return rax
 
 x,n
 switch n
-case 17,19
+case 60
 return 8x
 
-case 20
+case 62
+return 8x
+
+case 63
 return 3x
 
-case 21
+case 64
 x = 15 x
-/fall thorugh/
+/*fall thorugh*/
 
-case 22
+case 65
 x = x^2
 /fall thorugh/
 
-case 18
+case 61
 return 75 + x

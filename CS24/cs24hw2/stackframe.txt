@@ -1,7 +1,22 @@
 Stack Contents of fact(3)
 -------------------------
+3
+ret address
+2
+ret address
+1
+ret address
+
+
 
 Address     Value       Description
 --------    --------    ------------------------------------
-0x1008
+0x1008       ???          the return address of the caller
+0x1000       3           the current value
+0xff8        0x2020    the return 
+0xff0          2        the current value
+0xfe8         0x2020  
+0xfe0         1         the current value
+0xfd8         0x2020
+
 

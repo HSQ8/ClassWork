@@ -16,13 +16,12 @@ f1:
         movl    %esi, %eax ; copy y into eax
         cmpl    %edx, %eax ; compare edx and eax 
         cmovg   %edx, %eax ; if equal, copy edx into eax
-        ret                ; pop the base pointer
+        ret                ;
 
 
 /*====================================================================
  * int f2(int x)
- *  takes int x, and return 1 if x is even and positive or odd and 
- * negative, 0 otherwise.
+ *  takes int x and returns absolute value of x
  */
 .globl f2
 f2:
@@ -31,7 +30,7 @@ f2:
         sarl    $31, %edx   ; shift edx right 31 bits
         xorl    %edx, %eax  ; perform bit xor on edx, eax store in eax
         subl    %edx, %eax  ; subtract eax from edx and store in eax
-        ret      ; pop basepointer and return eaxre
+        ret      ; 
 
 
 /*====================================================================
