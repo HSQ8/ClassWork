@@ -1,22 +1,17 @@
 Stack Contents of fact(3)
 -------------------------
-3
-ret address
-2
-ret address
-1
-ret address
-
-
-
 Address     Value       Description
 --------    --------    ------------------------------------
-0x1008       ???          the return address of the caller
-0x1000       3           the current value
-0xff8        0x2020    the return 
-0xff0          2        the current value
-0xfe8         0x2020  
-0xfe0         1         the current value
-0xfd8         0x2020
+0x1008       ???        The return address of the previous program 
+                        before calling f()
+0x1000       ???        This is the return address of caller factorial main.
+0xff8        3          This is the current.
+0xff0        0x2020     This is the return address of the caller.
+0xfe8        2          This is the current value being computed.
+0xfe0        0x2020     This is the return address of the caller f(2)
+0xfd8        1          This is the current value computed.
+0xfd0        0x2020     This is the return address of the caller f(1)
+
+
 
 

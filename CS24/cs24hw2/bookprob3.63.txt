@@ -1,6 +1,28 @@
 Answer to Problem 3.63, CS:APP3e pp.314-315
 -------------------------------------------
 
+long switch_prob(long x, long n) 
+{
+    switch(n)
+    {
+        case 60:
+        case 62:
+        case 63:
+            x = x / 8;
+            break;l
+        case 64:
+            x = 15 * x;
+        case 65:
+            x = x * x;
+        default:
+            x = 75 + x;
+    }
+    return x;
+}
+
+--------------------------------------
+
+scratch work below:
 
 n = n - 60
 compare 5 with n
@@ -32,24 +54,28 @@ return rax
 
 
 
-x,n
-switch n
-case 60
-return 8x
+int x,n
+switch (n){
+case 60:
+return 8x;
 
-case 62
-return 8x
+case 62:
+return 8x;
 
-case 63
-return 3x
+case 63:
+return x / 8;
 
-case 64
-x = 15 x
+case 64:
+x = 15 * x;
 /*fall thorugh*/
 
-case 65
-x = x^2
+case 65:
+x = x^2;
 /fall thorugh/
 
-case 61
-return 75 + x
+case 61:
+return 75 + x;
+
+default:
+return 75 + x;
+}

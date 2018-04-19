@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Werror
+CFLAGS = -Wall -Werror -g
+ASFLAGS = -g
 
 all: factmain 
 

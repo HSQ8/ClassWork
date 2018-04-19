@@ -15,11 +15,13 @@ ex:
 	movl	%edx, -28(%rbp)
 	movl	%ecx, -32(%rbp)
 	movl	-24(%rbp), %eax
-	subl	-28(%rbp), %eax  #   -   
-	imull	-20(%rbp), %eax   #  *
+	subl	-28(%rbp), %eax   #  subtract M[rbp - 28] and eax
+                              #  and store into eax.
+	imull	-20(%rbp), %eax   #  multiple M[rbp - 20] and eax
+                              #  and store into eax.
 	movl	%eax, %edx
 	movl	-32(%rbp), %eax
-	addl	%edx, %eax         # +
+	addl	%edx, %eax        #  add edx and eax and store eax.
 	movl	%eax, -4(%rbp)
 	movl	-4(%rbp), %eax
 	popq	%rbp

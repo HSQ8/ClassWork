@@ -1,11 +1,15 @@
 What does the assembly code do?
 -------------------------------
 
-line 1: move the quadword at M[16+%rbp] , x to register rax
-line 2: signed 64bit multiply of constant 3 quadword  with contents of register rax) and implicitly store in rdx:rax
+line 1: move the quadword at M[16+%rbp] , x, to register rax
+line 2: signed 64bit multiply of constant 3 quadword  with contents of 
+        register rax) and implicitly store in rdx:rax
 line 3: 64 bit addition of quadword 12 with rax, store in rax
-line 4: signed full multiply of quadword at memory location M[16+%rbp] ,x  with contents of register rax) and implicitly store in rdx:rax
+line 4: signed full multiply of quadword at memory location M[16+%rbp] ,x  
+        with contents of register rax) and implicitly store in rdx:rax
 line 5: subtract quadword 17 from rax
 
 
 (3 * x + 12) * x - 17
+which simplifies to 
+3x^2 + 12 x - 17
