@@ -37,8 +37,8 @@ rl_decode:
         jge     find_space_done
 
 find_space_loop:
-        add     (%rdi, %rcx), %bl         # Add in the count, then move
-        add     $1, %rcx                  # forward to the next count!
+        add     (%rdi, %rcx), %ebx         # Add in the count, then move @TODO
+        add     $2, %rcx                  # forward to the next count! @TODO 2
 
         cmp     %esi, %ecx
         jl      find_space_loop
@@ -70,8 +70,9 @@ decode_loop:
         mov     1(%rdi, %rcx), %bl       # bl is the value to repeat
 
 write_loop:
-        mov     %bl, (%rax, %r10)
+        mov     %bl, (%rax, %r10)  # no incrementing r10, @TODO
         dec     %bh
+        add     $1, %r10
         jnz     write_loop
 
         add     $2, %ecx

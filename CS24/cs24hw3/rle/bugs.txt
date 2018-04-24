@@ -2,4 +2,10 @@ Bugs in rl_decode() function:
 -----------------------------
 
 
+line 41, not incrementing by 2s
+
+bl to ebx
+
+not increment r10
+
 
