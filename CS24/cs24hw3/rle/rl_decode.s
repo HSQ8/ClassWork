@@ -24,6 +24,7 @@ rl_decode:
 
         # Save rbx since it is callee-save, and we definitely use it a lot.
         push    %rbx
+        push    %r12
 
         # First, figure out how much space is required to decode the data.
         # We do this by summing up the counts, which are in the odd memory
@@ -31,14 +32,16 @@ rl_decode:
 
         mov     $0, %ecx                  # %ecx = loop variable (int)
         mov     $0, %ebx                  # %ebx = size required (also int)
-
+        mov     $0, %r12
         # Find-space while-loop starts here...
         cmp     %esi, %ecx
         jge     find_space_done
 
 find_space_loop:
-        add     (%rdi, %rcx), %ebx         # Add in the count, then move @TODO
-        add     $2, %rcx                  # forward to the next count! @TODO 2
+        add     (%rdi, %rcx), %bl         # Add in the count, then move @TODO
+        add      %rbx, %r12
+        xor      %rbx, % rbx 
+        add      $2, %rcx                  # forward to the next count! @TODO 2
 
         cmp     %esi, %ecx
         jl      find_space_loop
@@ -48,9 +51,14 @@ find_space_done:
         # Allocate memory for the decoded data using malloc.
         # Number of bytes required goes in rdi, which we were using before.
         # Pointer to allocated memory will be returned in %rax.
+        mov   %r12, %rbx
         push    %rdi
+        push    %rsi
+        push    %rdx
         mov     %rbx, %rdi         # Number of bytes to allocate...
         call    malloc
+        pop     %rdx
+        pop     %rsi
         pop     %rdi
 
         # Write the length of the decoded output to the output-variable
@@ -71,8 +79,8 @@ decode_loop:
 
 write_loop:
         mov     %bl, (%rax, %r10)  # no incrementing r10, @TODO
-        dec     %bh
         add     $1, %r10
+        dec     %bh
         jnz     write_loop
 
         add     $2, %ecx
@@ -82,6 +90,7 @@ write_loop:
 
 decode_done:
         # Restore callee-save registers.
+        pop     %r12
         pop     %rbx
 
         # No stack frame to clean up.
