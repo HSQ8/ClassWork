@@ -1,0 +1,55 @@
+A.
+1. An address from outside malloc()
+
+If an address originated from outside malloc, my free function has a 
+capability to handle it. Refer to the if block in the beginning of the free 
+function, my function will check that the passed in pointer is greater than or 
+equal to the base mem pointer and that it is less than the mem base pointer +
+ offset. This will ensure that the pointer we attempt to cast to a header will
+be within the allocated pool of actual memory. If the check fails, then
+we print an error message to stderr and abort.
+
+2. An address that is contained within a memory block that is returned by 
+myalloc()
+
+currently myalloc does not handle this case. It will attempt to case the 
+pointer to a header* and then attempt to dereference it and access its 
+attributes. This will fail as we will get garbage results and cause seg-faults 
+as we attempt to access free lists and other such things based on the 
+locations pointed to by garbage.
+
+3. An address that has already been freed.
+Currently my function handles this case. When a programmer frees a 
+block that has already been freed, my function will access the header and see
+that the header will say it has been freed, in which case
+we will abort as we are doing something improper. In the case that 
+the block has both been freed and coalesced, if it coalesced to the right
+then the header will be intact and we will still be able to read the flag for
+freed or not. But suppose we already coalesced with a block to the left, then
+the header has the possibility of being overwritten, and this check can fail.
+at which point we will attempt to access invalid headers and seg fault.
+
+B.
+1. I already handle it.
+
+2. Idealy, I would have to iterate through the list of headers that are
+currently on the heap and match the pointer we're trying to free
+to one of our blocks in the list. Since the first header is permanent, 
+and since all subsequent headers will be reached by a size computation of 
+block size, thus ensuring validity, if the input pointer did not match
+the address of one of our headers, it must then be invalid. 
+To implement this, 
+simply traverse through all blocks with a while loop while checking for match
+with pointer we're trying to free.
+
+3. I handle the first case where the header has not been overwritten. In the 
+case where it has been overwritten, I can check the existence of this block
+against other blocks. 
+In this scenario, I would have to check whether there exists a valid 
+header definition in the block we're trying to free. Then check the 
+reachability of this block based on other blocks. The algorithm goes like this:
+
+Assume the pointer is valid, cast to a header pointer. If we see garbage, then 
+start traversal of all blocks from the base pointer mem and see if any valid
+block headers match up, it none match up, then it must mean that we have 
+already coalesced and overwritten such a block, then we do not free.

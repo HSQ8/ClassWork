@@ -1,28 +1,28 @@
 Bugs in rl_decode() function:
 -----------------------------
 
-
-line 41, not incrementing by 2s
+1. line 44 inside find space loop - not incrementing by 2s
 when we loop through the find space loop, we need to make sure that
-we are incrementing the offset by 2 each time as we want to access the numeric
-values in every value key pair. 
+we are incrementing the offset by 2 each time as we want to access the 
+numericvvalues in every value key pair. 
 
-bl to ebx, need larger accumulator
+2. line 41 inside find space loop - bl to ebx, need larger accumulator
 bl is the lower byte of rbx, and thus it holds values up to 255. Since we 
 attempt to accumulate values that are potentially larger than 255 in bl, we 
-will get an overflow. To correct the issue, we accumulate in a larger register 
-by moving bl into r12 each time, then clearing bl for a new accumulation. We then move this value into rbx for calling malloc.
+will get an overflow. To correct the issue, we accumulate in a larger 
+register by moving bl into r12 each time, then clearing bl for a new
+ accumulation. We then move this value into rbx for calling malloc.
 
-not increment r10
-each time we write our subsequent expanded value into the register, we should 
-increment r10, the offset that points into the return buffer, so that we are
-writing in a new space each time. The original code was such that it wrote to the same value all the time.
+3. line 82 inside write loop - not increment r10
+each time we write our subsequent expanded value into the register, we 
+should increment r10, the offset that points into the return buffer, 
+so that we are writing in a new space each time. The original code was 
+such that it wrote to the same value all the time.
 
-
-caller saved registers rdi rsi rdx
-Since we call malloc and we don't know the behavior of malloc, we need to save
-these registers, especially since these registers hold the return value 
-pointers and other such important info. Thus to be able to return our value in
-the expected memory address, we save these registers.
+4. caller saved registers rdi rsi rdx
+Since we call malloc and we don't know the behavior of malloc, we need to 
+save these registers, especially since these registers hold the return 
+value pointers and other such important info. Thus to be able to return 
+our value in the expected memory address, we save these registers.
 
 

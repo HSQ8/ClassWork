@@ -1,23 +1,22 @@
 Answers for the "Arrays, Pointer Arithmetic, and Structs" section of CS24 HW3:
 1.)
 
+0 |00
 1 |00
 2 |00
-3 |00
-4 |EF
-5 |BE
-6 |AD
-7 |DE
+3 |EF
+4 |BE
+5 |AD
+6 |DE
+7 |00
 8 |00
 9 |00
 10|00
 11|00
-12|00
-13|BE
-14|BA
-15|FE
-16|CA
-
+12|BE
+13|BA
+14|FE
+15|CA
 
 
 
@@ -26,13 +25,17 @@ Answers for the "Arrays, Pointer Arithmetic, and Structs" section of CS24 HW3:
 +--------------------+--------+------+---------+
 |        name        | offset | size | padding |
 +--------------------+--------+------+---------+
-| int id             |      0 |    4 |       4 |
-| char code[5]       |      8 |    8 |       2 |
+| int id             |      0 |    4 |       0 |
+| char code[5]       |      4 | 5 + 7|       7 |
 | struct entry* next |     16 |    8 |       0 |
 +--------------------+--------+------+---------+
 
 
 3.)
-5th node 8th+4th byte = 5*(24)+8+4 = offset = 132
+5th node 8th+4th byte = 4*(24)+ 4 + 3 = offset = 96 + 7 = 103
+this means that we have 4 preceding full notes of size 24, hence 4 * 24
+then we have one int, which is +4, and then the 4th char, which is + 3
 
+
+offset = 103
 
