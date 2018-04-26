@@ -38,11 +38,26 @@ int main(int argc, char *argv[]) {
     /* Perform simple allocations and deallocations. */
     /* Change the below code as you see fit, to test various scenarios. */
 
-    unsigned char *a = allocate(100, 'A');
-    // unsigned char *b = allocate(200, 'B');
-
+    unsigned char *a = allocate(146, 'A');
+    printblockinfo();
+    unsigned char *b = allocate(200, 'B');
+    printblockinfo();
+    unsigned char *c = allocate(78, 'C');
+    printblockinfo();
+    myfree(b);
+    printblockinfo();
     myfree(a);
-    // myfree(b);
+    printblockinfo();
+    unsigned char *d = allocate(155, 'D');
+    printblockinfo();
+    unsigned char *e = allocate(55, 'E');
+    printblockinfo();
+    myfree(c);
+    printblockinfo();
+    myfree(d);
+    printblockinfo();
+    myfree(e);
+    printblockinfo();
 
     close_myalloc();
 
