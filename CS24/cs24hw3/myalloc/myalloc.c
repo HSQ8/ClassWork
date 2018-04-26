@@ -16,25 +16,25 @@
 
 /**
  * documentation for block
- * each block will contain a header whose size is made up of a combination of 
- * 32 bit signed int values
+ * each block will contain a header whose size is made up of a combination of
+ * 32 bit signed int values and pointers
  *
  * the first value will be the size of the block as well as its availability,
  * if it were negative, then the block is not available, if it is positive,
  * then it is available.
  *
  * the second value will be the distance to the previous block
- * the third value will be the distance to the next free block 
+ * the third value will be the distance to the next free block
  *
- * each block looks like this 
+ * each block looks like this
  * +-------+-------+-------+-------+------+
  * | int_1 | int_2 | int_3 | int_4 |  P   |
  * +-------+-------+-------+-------+------+
- * 
- * int_1, + for available, - for unavailable, describe size of block 
- * int_2, distance to header of previous block    
- * int_3 distance to next free block   
- * int_4 distance to the previous free block  
+ *
+ * int_1, + for available, - for unavailable, describe size of block
+ * int_2, distance to header of previous block
+ * int_3 distance to next free block
+ * int_4 distance to the previous free block
  * P, payload
  *
  *
@@ -89,7 +89,7 @@ void init_myalloc() {
             MEMORY_SIZE);
         abort();
     }
-    /*Initializes the first 4 bytes to mark the end of the block, the 
+    /*Initializes the first 4 bytes to mark the end of the block, the
     previous block is at addressed zero, so it points to itself
     and the next free block is also itself*/
 
@@ -119,7 +119,7 @@ void printblockinfo(){
 
             if(start->inUse == 1){
                 allocated_bytes += (int)start->size;
-            }        
+            }
             printf("inUse: %d\n", (int)start->inUse);
             accumulativeHeader_memory += sizeof(Header);
 
@@ -140,14 +140,6 @@ void printblockinfo(){
  */
 unsigned char *myalloc(int _size) {
 
-    /* TODO:  The unacceptable allocator simply checks to see if there are at
-     *        least "size" bytes left in the pool, and if so, the caller gets
-     *        the current "free-pointer" value, and then freeptr is incremented
-     *        by size bytes.
-     * 
-     *        Your allocator will be more sophisticated!
-     */
-
     Header* header, *current;
     Header newHeader;
     unsigned char* returnPtr = (unsigned char*) 0;
@@ -156,14 +148,19 @@ unsigned char *myalloc(int _size) {
     header = (Header*) mem;
     //finds first block not currently in use
     while(header->inUse == 1){
-        header = getNextBlock(header);
+          header = getNextBlock(header);
+          // we reach the end of the memory pool and haven't found a
+          // free block, meaning we run out of memory.
+          if(header == NULL){
+              return returnPtr;
+          }
     }
     if(header->inUse == 1){
         //cannot find any free blocks
-        fprintf(stderr, "myalloc: cannot service request of size %d with \
-            bytes allocated\n", _size);
+        fprintf(stderr, "myalloc: (1)cannot service request of size %d\n",
+         _size);
         return returnPtr;
-        
+
     }
     // state assumption is that we found one one free block, regardless
     // of size
@@ -172,24 +169,27 @@ unsigned char *myalloc(int _size) {
 
     // find the smallest block that can still contain payload
     // out of the current free blocks
-
-    while(header->next_free != NULL){
-        if((header->size < smallestGoodSize || smallestGoodSize < _size) && header->size > _size){
+    //printf("%s\n", "NEWALLOC RUN==========");
+    while(header != NULL){
+        //printf("%d\n", header->size);
+        if((header->size < smallestGoodSize || smallestGoodSize < _size) &&
+        header->size >= _size){
             smallestGoodSize = header->size;
             current = header;
         }
-        header = header->next_free;
+        //header = header->next_free;
+        header = getNextFree(header);
     }
 
     header = current; // now both pointers point to optimal block
     // if in our optimization we did not find a suitable block
     // we return 0
-    if(smallestGoodSize > _size){
+    if(smallestGoodSize >= _size){
         header->inUse = 1;
         returnPtr = (unsigned char*)(current+1);
     } else {
-        fprintf(stderr, "myalloc: cannot service request of size %d with \
-            bytes allocated\n", _size);
+        //fprintf(stderr, "myalloc: (2)cannot service request of size %d\n",
+        // _size);
     }
     // conditional split block if current allocated block is larger
     // than we need
@@ -197,11 +197,13 @@ unsigned char *myalloc(int _size) {
         current = (Header*)((unsigned char *)current + HEADER_SIZE + _size);
         *current = newHeader;
         current->size = header->size - HEADER_SIZE - _size;
+        current->inUse = 0;
+        current->prev_block = header;
         current->next_free = getNextFree(current);
         current->prev_free = getPrevFree(current);
-        current->prev_block = header;
-        current->inUse = 0;
-        
+        if(getNextBlock(current) != NULL){
+            getNextBlock(current)->prev_block = current;
+        }
         header->next_free = NULL;
         header->size = _size;
         block_counter++;
@@ -247,7 +249,7 @@ Header* getNextBlock(Header* ptr){
 void myfree(unsigned char *oldptr) {
     // first, add current free block into explicit free list, then
     // we have to coalesce both sides, if possible by first coalescing
-    // right side then moving the pointer to the previous left block and 
+    // right side then moving the pointer to the previous left block and
     // attempt to coalesce the right block(which was the current center block)
     Header* current, *left, *right;
     current = (Header*)(oldptr - HEADER_SIZE);
@@ -258,7 +260,7 @@ void myfree(unsigned char *oldptr) {
 
     if(right != NULL){
         if(right->inUse == 0){
-            coalesce(current, right); 
+            coalesce(current, right);
         }
     }
     if(left != NULL){
@@ -290,7 +292,7 @@ void insertIntoExplicitList(Header* current){
         right->prev_free = current;
         current->next_free = right;
     }
-    
+
     if(left != NULL){
         left->next_free = current;
         current->prev_free = left;
