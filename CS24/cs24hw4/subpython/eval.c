@@ -224,6 +224,10 @@ void print_ref(Reference ref) {
 
 void print_ref_ext(Reference ref, bool newline, int depth) {
     Value *v = deref(ref);
+    if (v == NULL) {
+        printf("%s\n", "skipped a print");
+        return;
+    }
     switch (v->type) {
         case VAL_FLOAT:
             fprintf(stdout, "%g", ((FloatValue *) v)->float_value);

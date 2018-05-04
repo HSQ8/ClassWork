@@ -1,0 +1,4 @@
+assuming that r8 holds the address to a struct of Shape subclass.
+
+movq %r8 rbx
+movq (%r8)

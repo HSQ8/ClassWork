@@ -10,6 +10,16 @@
  */
 typedef int Reference;
 
+/*!
+ * An enumeration of the possible states of a value struct
+ * whether it is marked or not, helping to determine which objects
+ * we can garbage collect.
+ */
+typedef enum FLAG {
+    FREE,
+    NOT_FREE
+} FLAG;
+
 
 /*! This value is used to represent a "null" reference. */
 #define NULL_REF (-1)
@@ -61,6 +71,7 @@ typedef struct DictNode {
  *    key-value pairs, which are themselves allocated from the memory pool
  */
 typedef struct Value {
+    FLAG flag;
     /*!
      * Every Value knows the Reference associated with it, so that we don't
      * have to search for what reference goes with a particular value in the
@@ -93,6 +104,7 @@ typedef struct Value {
  * the float it stores.
  */
 typedef struct FloatValue {
+    FLAG flag;
     /*!
      * Every Value knows the Reference associated with it, so that we don't
      * have to search for what reference goes with a particular value in the
@@ -124,6 +136,7 @@ typedef struct FloatValue {
  * the string it stores.
  */
 typedef struct StringValue {
+    FLAG flag;
     /*!
      * Every Value knows the Reference associated with it, so that we don't
      * have to search for what reference goes with a particular value in the
@@ -159,6 +172,7 @@ typedef struct StringValue {
  * all the list-related details.
  */
 typedef struct ListValue {
+    FLAG flag;
     /*!
      * Every Value knows the Reference associated with it, so that we don't
      * have to search for what reference goes with a particular value in the
@@ -190,6 +204,7 @@ typedef struct ListValue {
  * all the dictionary-related details.
  */
 typedef struct DictValue {
+    FLAG flag;
     /*!
      * Every Value knows the Reference associated with it, so that we don't
      * have to search for what reference goes with a particular value in the

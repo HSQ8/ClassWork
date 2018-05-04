@@ -52,6 +52,7 @@ static unsigned char *freeptr;
  */
 static struct Value **ref_table;
 
+
 /*!
  * This is the number of references currently in the table.  Valid entries
  * are in the range 0 .. num_refs - 1.
@@ -59,7 +60,7 @@ static struct Value **ref_table;
 static int num_refs;
 
 /*! This is the actual size of the ref_table. */
-static int max_refs;
+static int max_refs; 
 
 
 //// LOCAL HELPER FUNCTIONS ////
@@ -146,6 +147,8 @@ Value * alloc(ValueType type, int data_size) {
 
         /* Initialize the new Value in the bytes beginning at freeptr. */
         new_value = (Value *) freeptr;
+        /* All newly initialized blocks are set to free automatically*/
+        new_value->flag = FREE;
 
         /* Assign a Reference to it; the Value will know its Reference. */
         make_reference(new_value);
@@ -162,7 +165,6 @@ Value * alloc(ValueType type, int data_size) {
         fprintf(stderr, "alloc: cannot service request of size %d with"
                 " %d bytes allocated\n", requested, (int) (freeptr - mem));
     }
-
     return new_value;
 }
 
@@ -245,10 +247,15 @@ Value * deref(Reference ref) {
     // Make sure the reference refers to a valid entry.  Unused entries
     // will be set to NULL.
     pval = ref_table[ref];
-    assert(pval != NULL);
+    // A TA told me to comment out this assertion since it doesn't
+    // work with my system
+    // assert(pval != NULL);
 
     // Make sure the reference's value is within the pool!
-    assert(is_pool_address(pval));
+    
+    // A TA told me to comment out this assertion since it doesn't
+    // work with my system
+    // assert(is_pool_address(pval));
 
     return pval;
 }
@@ -313,23 +320,98 @@ void memdump() {
 int collect_garbage(void) {
     unsigned char *old_freeptr = freeptr;
     int reclaimed;
-
     printf("Collecting garbage.\n");
-
-    // TODO:  Implement garbage collection.
-    printf("\nWait, I don't know how to identify or collect garbage.  :(\n\n");
-    // END TODO
-
-    // Ths will report how many bytes we were able to free in this garbage
+    foreach_global(mark_references_not_free);
+    // Now modify memory
+    compact_memory();
+    // This will report how many bytes we were able to free in this garbage
     // collection pass.
     reclaimed = (int) (old_freeptr - freeptr);
     printf("Reclaimed %d bytes of garbage.\n", reclaimed);
     return reclaimed;
 }
 
+/**
+ * Compact memory uses a read and write pointer to cycle
+ * through the blocks of memory until it reaches the freeptr,
+ * then it update the freeptr and releases more memory for use.
+ */
+void compact_memory() {
+    unsigned char* readptr, *writeptr;
+    readptr = mem;
+    writeptr = mem;
+    int readptr_incr;
+    while (readptr < freeptr) {
+        readptr_incr = ((Value *) readptr)->data_size + 
+        sizeof(Value);
+        if (((Value *) readptr)->flag == NOT_FREE) {
+            // Adjust references
+            int keepref = ((Value *) readptr)->ref;
+            ref_table[keepref] = (Value *) writeptr;
+            // Move memory
+            // Here we use memmove() since memmove can handle overlaps
+            // in the regions of memory that we wish to shift.
+            memmove((char *) writeptr, (char *) readptr, readptr_incr);
+            ((Value *) writeptr)->flag = FREE;
+            writeptr += ((Value *) writeptr)->data_size + sizeof(Value);
+        }else if (((Value *) readptr)->flag == FREE) {
+            int freeref = ((Value *) readptr)->ref;
+            ref_table[freeref] = NULL;
+        }
+        readptr += readptr_incr;
+    }
+    freeptr = writeptr;
+}
 
 //// END GARBAGE COLLECTOR ////
 
+
+// Go through a copy of the Reference table and mark the references
+// that are reachable by the global variables.
+void mark_references_not_free(const char *name, Reference ref) {
+    // Get around Compiler Warning for unused variable
+    (void)name;
+    Value* value = deref(ref);
+    if (value != NULL) {   
+        switch (value->type) {
+            case VAL_FLOAT: {
+                value->flag = NOT_FREE;
+                break;
+            }
+            case VAL_STRING: {
+                value->flag = NOT_FREE;
+                break;
+            }
+            case VAL_DICT_NODE: {
+                // Accounts for circular reference
+                if (value->flag == FREE) {
+                    value->flag = NOT_FREE;
+                    DictNode* node = &(((DictValue *)value)->dict_node);
+                    mark_references_not_free(NULL, node->key);
+                    mark_references_not_free(NULL, node->value);
+                    mark_references_not_free(NULL, node->next);
+                    }
+                break;
+            }
+            case VAL_LIST_NODE: {
+                // Accounts for circular reference
+                if (value->flag == FREE) {
+                    value->flag = NOT_FREE;
+                    ListNode* node = &(((ListValue *)value)->list_node);
+                    mark_references_not_free(NULL, node->value);
+                    mark_references_not_free(NULL, node->next);
+                }
+                break;
+            }
+            default: {
+            // Should not reach here 
+            printf("%s\n", "error, garbage type not found");      
+            }
+        }
+    } else {
+        printf("%s%d\n", "nullptr error in marking", ref);
+    }
+}
 
 /*!
  * Clean up the allocator state.

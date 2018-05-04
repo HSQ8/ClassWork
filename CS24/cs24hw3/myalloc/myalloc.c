@@ -363,10 +363,6 @@ void insertIntoExplicitList(Header* current) {
     left = getPrevFree(current);
     right = getNextFree(current);
 
-    /* left = current->prev_free;
-     * right = current->next_free;
-     */
-
 
     if (right != NULL) {
         right->prev_free = current;

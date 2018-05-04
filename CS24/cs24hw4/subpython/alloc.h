@@ -12,6 +12,8 @@
 #define IMPALLOC_H
 
 #include "types.h"
+#include <stdlib.h>
+#include <string.h>
 
 
 /* Initializes allocator state, and memory pool state too. */
@@ -34,6 +36,10 @@ int collect_garbage(void);
 
 /* Clean up the allocator and memory pool state. */
 void close_alloc(void);
+/* Iterate through global variables and find reachable objects*/
+void mark_references_not_free(const char *name, Reference ref);
 
+/* Compacts the memory and collects garbage*/
+void compact_memory(void);
 
 #endif /* IMPALLOC_H */

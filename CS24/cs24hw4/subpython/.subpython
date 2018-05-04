@@ -1,0 +1,735 @@
+5+6
+5^7
+5**7
+5+7+8
+5.45+66
+lst = [1,"a",2]
+lst
+type("a")
+type
+type()
+lst = [1,"a",2]
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst = [[1,1][2,2][3,3][4,4][5,5]]
+lst = [[1,1],[2,2],[3,3],[4,4],[5,5]]
+lst
+lst = lst[2][2]
+lst = lst[1][2]
+lst = lst[1][1]
+lst
+lst
+gc()
+-v
+35
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+34
+gc()
+2
+2
+2
+2
+2
+2
+2
+2
+lst = [1,1,1]
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst[1] = lst
+lst
+lst
+lst
+lst
+lst
+lst
+lst = [1,2,3]
+lst
+lst = lst + lst
+lst
+lst
+lst = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+lst [0] = lst
+b
+b
+b
+b = 3
+4
+4
+5
+6
+gc()
+g = 5
+b = 5
+c = 6
+c = 7
+gc()
+g = 6
+v = 5
+g = 7
+gc()
+g = 6
+h = 8
+g = 7
+gc()
+g = 6
+g = 7
+g = 6
+g = 7
+h = 8
+p = h+g
+gc()
+g = 7
+g = 8
+gc()
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3
+3a
+a = 3
+a = 4
+gc()
+4
+4
+4
+6
+7
+7
+8
+8
+89
+1
+1
+1
+7
+7
+3
+7
+a= 0
+b = [1,2,3,4,5,6]
+b[1] = b
+b[1] = b
+b[1] = b
+b[1] = b
+gc()
+5
+6
+g = 6
+g= 7
+gc()
+g
+gc
+gc()
+gc()
+g = 7
+h = 8
+g = 9
+g = 10
+gc()
+gc()
+gc()
+gc()
+gc()
+gc()
+g = 5
+g = 6
+g = 7
+gc()
+gc()
+g = 5
+g = 6
+g = 7
+h = 8
+ h = 9
+gc()
+exit()
+a = 1
+a = 2
+gc()
+a
+a + 1
+gc()
+a
+a = 1
+a = 2
+gc()
+a
+a + 1
+a
+gc()
+a
+gc()
+a = 1
+a = 2
+a = 3
+gc()
+gc()
+a = 1
+a = 2
+a = 3
+gc()
+gc(0
+gc()
+a = 1
+a = 2
+a = 3
+a = 4
+gc()
+a = 1
+a = 2
+a = 3
+gc()
+gc()
+a = 1
+a = 2
+ a = 3
+gc()
+a = 1
+a = 2
+ a = 3
+gc()
+a = 1
+a = 2
+a = 3
+gc()
+gc()
+a = 1
+gc()
+gc()
+a = 2
+gc()
+gc()
+a = 1
+gc()
+a = 2
+gc()
+gc()
+a = 1
+gc()
+gc()
+a = 2
+gc()
+a = 1
+a = 2
+gc()
+a = 1
+ a = 2
+gc()
+a = `
+a = 1
+a = 2
+gc()
+a = 1
+a = 2
+gc()
+a = 1
+quit
+quit()
+a = 1
+a = 2
+gc()
+gc()
+gc()
+a = 1
+a = 2
+gc()
+a = 1
+a = 2
+gc()
+gc()
+a
+a = 1
+ a = 2
+gc()
+a = 1
+a = 2
+gc()
+a = 1
+a = 2
+gc()
+gc()
+exit()
+a = 1
+a = 2
+gc()
+gc()
+a = 
+a = 1
+a = 2
+gc()
+gc()
+gc()
+a = 3
+gc()
+a
+make
+a = 1
+a = 2
+a = 3
+gc()
+a
+a = 4
+gc()
+a = 1
+a = 2
+a=3
+gc()
+a = 4
+gc()
+a = 1
+a = 3
+a = 2
+gc()
+a
+a = 4
+gc()
+gc()
+gc()
+a = 1
+a = 2
+a = 3
+gc()
+gc()
+a = 4
+a
+gc()
+gc()
+gc()
+gc()
+a = 1
+a = 2
+ a = 3
+a
+gc()
+a
+a = 1
+a = 2
+ a = 3
+gc()
+a
+gc()
+gc()
+a = 1
+a=2
+a=3
+gc()
+a
+a = 4
+gc()
+gc()
+gc()
+gc()
+del a
+gc()
+a = [1,2,3]
+gc()
+b = [4,5,6]
+b
+a[2] = b[2]
+gc()
+gc()
+a =[1,2]
+gc()
+gc()
+del a
+gc()
+a = [1,2]
+b = 3
+b
+a
+a[1] = b
+a
+del b
+a
+gc()
+gc()
+gc()
+gc()
+gc()
+a
+a =1
+a =2
+a=3
+a=4
+gc()
+gc()
+a = 1
+a =2
+a=3
+gc()
+a =1
+a=
+a=2
+a=3
+a
+a
+gc()
+a
+a =4
+gc()
+a = [1,2,3]
+gc()
+a
+bt
+a = 1
+a=2
+a=3
+gc()
+a=1
+a=2
+a=3
+gc()
+a=1
+a=2
+a=3
+gc()
+a=1
+a=2
+a=3
+gc()
+b=[1,2,3]
+gc()
+c = {1:2, 3:4}
+gc()
+a = 1
+a = 2
+a=3
+gc()
+a = 1
+a = 2
+a=3
+gc()
+l = [4,5,6]
+l = 7
+gc()
+a = 1
+b = 2
+a = 2
+b = a
+gc()
+a = 1
+a=2
+a=3
+gc()
+a=1
+a=2
+a=3
+gc()
+a =1
+a=2
+a=3
+gc()
+a=1
+a=2
+a=3
+gc()
+l = [1,2,3]
+a =1
+a=2
+a=3
+gc()
+l = [4,5,6]
+l = 3
+gc()
+l + 2
+l = l+2
+gc()
+l = [4,5,6]
+l[2]=l
+l
+l[1] = {"str":"word", "float":[5,6]}
+gc()
+l = [1,2,3]
+l[2] = l
+gc()
+l = [1,2,3]
+l[2] = l
+l = 5
+gc()
+l = [1,2,3]
+l[2] = l
+l
+gc()
+l
+l = [1,2]
+l[1] = l
+gc()
+l = [1,2]
+l[1] = l
+gc()
+l
+l
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+1
+gc()
+l
+l
+gc()
+gc()
+l = [1,2]
+l[1]=l
+l
+gc()
+l
+l
+l = [1,2]
+l[1] = l
+l[3]
+gc()
+l=[1,1]
+l[1] = l
+gc()
+gc()
+make
+l = [1,1]
+l[1] = l
+gc()
+l = [1,1,]
+l = [1,1]
+l[1] = l
+gc()
+l = [1,1]
+l[1] = l
+gc()
+l = [1,1]
+l[1] = l
+gc()
+l = [1,1]
+l[1] = l
+gc()
+l = [1,1]
+l[1] = l
+gc()
+l
+a = 1
+a = 2
+a = 3
+a = a
+gc()
+l = [1,2,3,4,5]
+l[1]=l
+l[4] = l
+l
+gc()
+l
+del l
+gc()
+l
+a
+gc()
+l = [1,1]
+l[0] = l
+l[1] = l
+l
+gc()
+l = [1,1]
+l[1]=l
+l[0]=l
+gc()
+l
+gc()
+gc()
+br alloc.c:358
+l=[1,1]
+l[1] = l
+l[0] = l
+gc()
+l = [1,1]
+l[0] = l
+l[1] = l
+gc()
+a =1
+a=2
+a=1
+a=2
+a=3
+gc()
+a=4
+gc()
+gc()
+a=1
+a=2
+a=3
+gc()
+a=4
+gc()
+gc()
+a=1
+a=2
+a=3
+gc()
+a=4
+gc()
+gc()
+gc()
+a=5
+gc()
+l = [1,1]
+l=6
+gc()
+dela
+del a
+gc()
+l
+l = [1,1\]
+l = [1,1]
+l[0] = l
+gc()
+gc()
+l[1] = l
+gc()
+gc()
+l
+l = 5
+gc()
+l = [1,1]
+a = l
+a
+l
+a[1] = l
+l = [1,1]
+l[0] = a
+a
+l
+x = {a:l}
+x
+x[a]
+x{a}
+x(a)
+a = [1,1]
+l = [1,1]
+a
+l
+a[1] = l
+l[0] = a
+d = {a:l, 1:2}
+gc()
+gc()
+del a
+gc()
+del l
+del d
+gc()
+a = 1
+b=2
+b=3
+a=4
+s = "lkasfjlasjflkasjflkjasdkfjlasjfkasfhjkashfjahflhsafhhwabfnebrnbqnbnbnbwqerntbrnetbrnwebtnvertbvewrbtvwebnrtvwebnmvtasdkjflkwejlkfjasdkljf"
+s
+s = "asfklsjafjajshfkjashfjkshdfjkahsdfkjashdfjlkasdhflasd"
+l = [s,1]
+l[1] = l
+gc()
+del a
+del b
+del s
+del l
+gc()
+a=1
+b=3
+a=3
+b=1
+a
+b
+gc()
+a=1
+a=2
+a=3
+a=4
+l=[1,1]
+l[0]=l
+l[1]=l
+l
+gc()
+l
+del l
+del a
+gc()
+l = [1,2,3,4]
+l[0] = l
+l[1] = l
+l[2] = l
+l[3] = l
+l
+del l
+gc()
+l

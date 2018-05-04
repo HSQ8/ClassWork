@@ -8,7 +8,7 @@
  * implementation instead of the standard one, or undefine it if you
  * want to stick with the standard one!
  */
-#undef ENABLE_MY_SETJMP
+#define ENABLE_MY_SETJMP
 
 
 #ifdef ENABLE_MY_SETJMP
