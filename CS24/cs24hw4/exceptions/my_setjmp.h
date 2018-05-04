@@ -2,6 +2,11 @@
 #define MY_SETJMP
 
 #include <stdint.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
 
 /*
  * Change to #define to enable the use of your own setjmp()/longjmp()
@@ -19,7 +24,7 @@
  */
 
 /* TODO:  Set this to the proper size for your jump-buffer. */
-#define MY_JB_LEN 0
+#define MY_JB_LEN 8
 typedef uint64_t my_jmp_buf[MY_JB_LEN];
 
 int my_setjmp(my_jmp_buf buf);

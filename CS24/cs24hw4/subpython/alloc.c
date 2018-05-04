@@ -316,7 +316,12 @@ void memdump() {
 
 //// GARBAGE COLLECTOR ////
 
-
+/**
+ * Garbage collector uses the mark and sweep algorithm
+ * to first mark blocks that needs to e saved and then sweep the blocks
+ * that needs to be cleaned
+ * 
+ */
 int collect_garbage(void) {
     unsigned char *old_freeptr = freeptr;
     int reclaimed;
@@ -341,6 +346,8 @@ void compact_memory() {
     readptr = mem;
     writeptr = mem;
     int readptr_incr;
+    // we increment until we reach the end of the current freeptr
+    // it is guaranteed that there will be no more blocks after it
     while (readptr < freeptr) {
         readptr_incr = ((Value *) readptr)->data_size + 
         sizeof(Value);
@@ -360,6 +367,7 @@ void compact_memory() {
         }
         readptr += readptr_incr;
     }
+    // adjust the freeptr
     freeptr = writeptr;
 }
 
