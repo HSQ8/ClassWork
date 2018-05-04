@@ -1,6 +1,15 @@
+/*
+ *
+ * 
+ */
+
+.text
+.global my_setjmp
+.global my_longjmp
+
 my_setjmp:
-    movq %rbp, (%rdi)
-    movq %rbx, 8(%rdi)
+    movq %rbx, (%rdi)
+    movq %rbp, 8(%rdi)
     movq %r12, 16(%rdi)
     movq %r13, 24(%rdi)
     movq %r14, 32(%rdi)
@@ -12,8 +21,8 @@ my_setjmp:
     ret
 
 my_longjmp:
-    movq (%rdi), %rbp
-    movq 8(%rdi), %rbx
+    movq (%rdi), %rbx
+    movq 8(%rdi), %rbp
     movq 16(%rdi), %r12 
     movq 24(%rdi), %r13 
     movq 32(%rdi), %r14 
@@ -21,11 +30,14 @@ my_longjmp:
     movq 48(%rdi), %rsp 
     movq 56(%rdi), %r11
     movq %r11, (%rsp) 
-    movq %rsi, %rax
-    cmp  $0,   %rax
+    and %rsi, %rsi
     jnz return_n 
-    movq $1,  %rax  
+    movq $1,  %rax
+    ret  
+
 return_n:
+
+    movq %rsi, %rax
     ret
 
 
