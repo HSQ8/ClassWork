@@ -1,4 +1,11 @@
-assuming that r8 holds the address to a struct of Shape subclass.
+assume that %r8 holds a Sphere_Data struct pointer
 
-movq %r8 rbx
-movq (%r8)
+movq (%r8), %rcx    # Derefernce the Sphere_Data ptr and 
+                    # move the class ptr in the struct that it points to
+                    # into %rcx
+movq (%rcx), %rdx   # Dereference the class pointer and get the function  
+                    # pointer into %rdx
+movq %r8, %rdi      # Pass the Sphere_Data ptr into the virtual function 
+                    # argument according the x64 convention.
+call *(%rdx)        # Call the virtual function by its pointer, since the 
+                    # argument is already in %rdi

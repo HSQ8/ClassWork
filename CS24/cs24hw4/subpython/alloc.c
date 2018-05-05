@@ -319,7 +319,8 @@ void memdump() {
 /**
  * Garbage collector uses the mark and sweep algorithm
  * to first mark blocks that needs to e saved and then sweep the blocks
- * that needs to be cleaned
+ * that needs to be cleaned. This garbage collection algorithm is
+ * linear in time. 
  * 
  */
 int collect_garbage(void) {
@@ -340,6 +341,8 @@ int collect_garbage(void) {
  * Compact memory uses a read and write pointer to cycle
  * through the blocks of memory until it reaches the freeptr,
  * then it update the freeptr and releases more memory for use.
+ *
+ * Compacting memory is also linear time in the number of objects.
  */
 void compact_memory() {
     unsigned char* readptr, *writeptr;
@@ -394,7 +397,7 @@ void mark_references_not_free(const char *name, Reference ref) {
                 // Accounts for circular reference
                 if (value->flag == FREE) {
                     value->flag = NOT_FREE;
-                    DictNode* node = &(((DictValue *)value)->dict_node);
+                    DictNode* node = &(((DictValue *) value)->dict_node);
                     mark_references_not_free(NULL, node->key);
                     mark_references_not_free(NULL, node->value);
                     mark_references_not_free(NULL, node->next);
@@ -405,7 +408,7 @@ void mark_references_not_free(const char *name, Reference ref) {
                 // Accounts for circular reference
                 if (value->flag == FREE) {
                     value->flag = NOT_FREE;
-                    ListNode* node = &(((ListValue *)value)->list_node);
+                    ListNode* node = &(((ListValue *) value)->list_node);
                     mark_references_not_free(NULL, node->value);
                     mark_references_not_free(NULL, node->next);
                 }

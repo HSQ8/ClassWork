@@ -17,11 +17,11 @@ my_setjmp:
     movq %rsp, 48(%rdi)
     movq (%rsp), %r11 
     movq %r11, 56(%rdi)
-    movq $0, %rax        # return 0 for the first time
+    movq $0, %rax         # return 0 for the first time
     ret
 
 my_longjmp:
-    movq (%rdi), %rbx    # restoring callee saved registers
+    movq (%rdi), %rbx     # restoring callee saved registers
     movq 8(%rdi), %rbp
     movq 16(%rdi), %r12 
     movq 24(%rdi), %r13 
@@ -30,13 +30,12 @@ my_longjmp:
     movq 48(%rdi), %rsp 
     movq 56(%rdi), %r11
     movq %r11, (%rsp) 
-    and %rsi, %rsi      # detect if rsi is zero
-    jnz return_n        # return passed in value if zero by jumping
-    movq $1,  %rax      # else return 1
+    and %rsi, %rsi        # detect if rsi is zero, if zero we return 1
+    jnz return_n          # return passed in value if zero by jumping
+    movq $1,  %rax        # else return 1
     ret  
 
 return_n:
-
     movq %rsi, %rax
     ret
 

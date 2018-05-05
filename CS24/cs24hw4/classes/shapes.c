@@ -49,7 +49,7 @@ void Shape_class_init(Shape_Class *class) {
  * function initializes the density of the shape, as well as the class info.
  */
 void Shape_init(Shape_Data *this, Shape_Class *class, float D) {
-    Shape_class_init((Shape_Class *)class);
+    Shape_class_init((Shape_Class *) class);
     this = (Shape_Data *) this;
     this->density = D;
 }
@@ -87,7 +87,7 @@ float Shape_getMass(Shape_Data *this) {
 
 /*! Static initialization for the Box class. */
 void Box_class_init(Box_Class *class) {
-    Shape_class_init((Shape_Class *)class);
+    Shape_class_init((Shape_Class *) class);
 }
 
 
@@ -98,7 +98,7 @@ void Box_class_init(Box_Class *class) {
  */
 void Box_init(Box_Data *this, Box_Class *class,
     float L, float W, float H, float D) {
-    Shape_init((Shape_Data *)this, (Shape_Class *)class, D);
+    Shape_init((Shape_Data *)this, (Shape_Class *) class, D);
     class->getVolume = Box_getVolume;
     Box_setSize(this, L, W, H);
 }
@@ -109,8 +109,8 @@ void Box_init(Box_Data *this, Box_Class *class,
  * "new Box(L, W, H, D)", performing both heap-allocation and initialization. 
  */
 Box_Data * new_Box(float L, float W, float H, float D) {
-    Box_Data* box = (Box_Data *)malloc(sizeof(Box_Data));
-    box->class = (Box_Class *)malloc(sizeof(Box_Class));
+    Box_Data* box = (Box_Data *) malloc(sizeof(Box_Data));
+    box->class = (Box_Class *) malloc(sizeof(Box_Class));
     Box_init(box, box->class, L, W, H, D);
     return box;
 }
@@ -145,7 +145,7 @@ float Box_getVolume(Box_Data *this) {
 
 /*! Static initialization for the Sphere class. */
 void Sphere_class_init(Sphere_Class *class) {
-    Shape_class_init((Shape_Class *)class);
+    Shape_class_init((Shape_Class *) class);
 }
 
 
@@ -155,7 +155,7 @@ void Sphere_class_init(Sphere_Class *class) {
  * density, and then it initializes its data members with the specified values.
  */
 void Sphere_init(Sphere_Data *this, Sphere_Class *class, float R, float D) {
-    Shape_init((Shape_Data *)this, (Shape_Class *)class, D);
+    Shape_init((Shape_Data *) this, (Shape_Class *) class, D);
     class->getVolume = Sphere_getVolume;
     Sphere_setRadius(this, R);
 
@@ -167,8 +167,8 @@ void Sphere_init(Sphere_Data *this, Sphere_Class *class, float R, float D) {
  * "new Sphere(R, D)", performing both heap-allocation and initialization. 
  */
 Sphere_Data * new_Sphere(float R, float D) {
-    Sphere_Data* sphere = (Sphere_Data *)malloc(sizeof(Sphere_Data));
-    sphere->class = (Sphere_Class *)malloc(sizeof(Sphere_Class));
+    Sphere_Data* sphere = (Sphere_Data *) malloc(sizeof(Sphere_Data));
+    sphere->class = (Sphere_Class *) malloc(sizeof(Sphere_Class));
     Sphere_init(sphere, sphere->class, R, D);
     return sphere;
 }
@@ -197,7 +197,7 @@ float Sphere_getVolume(Sphere_Data *this) {
 
 /*! Static initialization for the Cone class. */
 void Cone_class_init(Cone_Class *class) {
-    Shape_class_init((Shape_Class *)class);
+    Shape_class_init((Shape_Class *) class);
 }
 
 
@@ -207,7 +207,7 @@ void Cone_class_init(Cone_Class *class) {
  * density, and then it initializes its data members with the specified values.
  */
 void Cone_init(Cone_Data *this, Cone_Class *class, float BR, float H, float D) {
-    Shape_init((Shape_Data *)this, (Shape_Class *)class, D);
+    Shape_init((Shape_Data *) this, (Shape_Class *) class, D);
     class->getVolume = Cone_getVolume;
     Cone_setBaseHeight(this, BR, H);
 }
@@ -218,8 +218,8 @@ void Cone_init(Cone_Data *this, Cone_Class *class, float BR, float H, float D) {
  * "new Cone(BR, H, D)", performing both heap-allocation and initialization. 
  */
 Cone_Data * new_Cone(float BR, float H, float D) {
-    Cone_Data* cone = (Cone_Data *)malloc(sizeof(Cone_Data));
-    cone->class = (Cone_Class *)malloc(sizeof(Cone_Class));
+    Cone_Data* cone = (Cone_Data *) malloc(sizeof(Cone_Data));
+    cone->class = (Cone_Class *) malloc(sizeof(Cone_Class));
     Cone_init(cone, cone->class, BR, H, D);
     return cone;
 }

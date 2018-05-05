@@ -733,3 +733,15 @@ l
 del l
 gc()
 l
+l = [1,1]
+l[1] = l
+l[0] = l
+d = {l:4, "str",6}
+d = {l:4, "str":6}
+l
+l[1] = d
+gc()
+del l
+gc()
+del d
+gc()

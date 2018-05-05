@@ -1,19 +1,22 @@
-    // test for local variable change / stack corruption
-    // exception propagation across multiple function calls
-    // proper return, 1 or n
-    // exception within a simple function
-
-
-    #include "test_setjmp.h"
+#include "test_setjmp.h"
 
 static jmp_buf mybuffer;
 static int test_count = 10;
-void main(void) {
+
+/**
+ * Main function that tests for four things
+ * 1. Stack corruption of long jump.
+ * 2. Test whether long jump can return values properly that are not  1.
+ * 3. Test if long jump can return 1 if input is zero.
+ * 4. Test if long jump can jump across functions.
+ */
+int main(void) {
     srand(time(0));
     test_stack_corruption();
     test_longjmp_return ();
     longjmp_ret_one();
     longjump_across_functions();
+    return 0;
 }  
 
 /**
@@ -36,7 +39,7 @@ void test_stack_corruption() {
         i = (rand() % (upper - lower + 1)) + lower;
 
         int answer = a + b + c + d + e + f + g + h + i;
-        if (test_simple_jump(a,b,c,d,e,f,g,h,i) != answer) {
+        if (test_stack_corruption_helper(a,b,c,d,e,f,g,h,i) != answer) {
             passed = 0;
         }
     }
@@ -48,16 +51,16 @@ void test_stack_corruption() {
 } 
 
 
-int test_simple_jump(int a, int b, int c, int d, int e, int f, 
+int test_stack_corruption_helper(int a, int b, int c, int d, int e, int f, 
     int g, int h, int i) {
     int exception = my_setjmp(mybuffer);
     if (!exception) {
-        fake_function();
+        test_stack_corruption_helper_two();
     }
     return a + b + c + d + e + f + g + h + i;
 }
-void fake_function(){
-    my_longjmp(mybuffer,0);
+void test_stack_corruption_helper_two(){
+    my_longjmp(mybuffer, 0);
     printf("%s\n", "didn't jump");
 }
 
@@ -66,7 +69,7 @@ void fake_function(){
  * value 100 times and checking whether it matches the longjmp
  * return value. Does this with random numbers
  */
-void test_longjmp_return (){
+void test_longjmp_return () {
     int upper = 100, lower = 10, passed = 1, j;
     int a;
     for (int j = 0; j < test_count; ++j) {
@@ -82,6 +85,13 @@ void test_longjmp_return (){
         printf("%s\n", "executing long jump value passing    FAILED"); 
     }
 }
+
+/**
+ * helper function to long jump return that allows for a value to 
+ * propagate back
+ * @param  n the value we want to test
+ * @return   the value returned by long jump
+ */
 int returnVal(int n) {
     int exception = my_setjmp(mybuffer);
     if (exception == 0) {
@@ -95,7 +105,10 @@ void returnValChild(int n) {
     printf("%s\n", "didn't jump");
 }
 
-
+/**
+ * This functions tests in the case that long jump returns with a 
+ * value passed in of 0, it should return 1.
+ */
 void longjmp_ret_one(void) {
     int n = my_setjmp(mybuffer);
     
@@ -110,10 +123,18 @@ void longjmp_ret_one(void) {
     }
 }
 
+/**
+ * long jump return one helper function.
+ */
 void longjmp_ret_one_helper(void) {
     my_longjmp(mybuffer,0);
 }
 
+/**
+ * This function tests for long jump's ability to propagate across
+ * multiple functions. If it fails, then the function stack returns 
+ * normally and we wouldn't get n set to 1. 
+ */
 void longjump_across_functions(void) {
     int n = my_setjmp(mybuffer);
     
@@ -128,14 +149,23 @@ void longjump_across_functions(void) {
     }
 }
 
+/**
+ * helper function to long jump
+ */
 void longjump_across_functions_helper(void) {
     longjump_across_functions_helper2();
 }
 
+/**
+ * helper function to long jump
+ */
 void longjump_across_functions_helper2(void) {
     longjump_across_functions_helper3();
 }
 
+/**
+ * helper function to long jump
+ */
 void longjump_across_functions_helper3(void) {
     my_longjmp(mybuffer,0);
 }

@@ -2,10 +2,10 @@
 /* Test for stack corruption*/
 void test_stack_corruption();
 /* helper function for testing for stack corruption*/
-int test_simple_jump(int a, int b, int c, int d, int e, int f, 
+int test_stack_corruption_helper(int a, int b, int c, int d, int e, int f, 
     int g, int h, int i);
 /* helper function for testing for stack corruption*/
-void fake_function();
+void test_stack_corruption_helper_two();
 
 /* Test whether long jump can return the proper value passed to it*/
 void test_longjmp_return ();
