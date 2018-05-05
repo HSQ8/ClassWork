@@ -23,7 +23,6 @@
  * setjmp() and longjmp()!  Watch out stack, here we come!
  */
 
-/* TODO:  Set this to the proper size for your jump-buffer. */
 #define MY_JB_LEN 8
 typedef uint64_t my_jmp_buf[MY_JB_LEN];
 

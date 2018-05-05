@@ -8,7 +8,7 @@
 
 static jmp_buf mybuffer;
 static int test_count = 10;
-int main(void) {
+void main(void) {
     srand(time(0));
     test_stack_corruption();
     test_longjmp_return ();
