@@ -1,0 +1,68 @@
+Explicit Allocator Scenario:  Allocation Fails under First-Fit but not Best-Fit
+===============================================================================
+First fit strategy      35 KB heap
+
+* note, each white space should correspond to 1kb, X means allocated, space
+means its free, also there are lines | separating the blocks.
++-----------------------------------+
+|                                   |
++-----------------------------------+
+35 KB Free, allocate 10 KB
++------------------------------------+
+|XXXXXXXXXX|                         |
++------------------------------------+
+25 KB free, allocate 10 KB
++-------------------------------------+
+|XXXXXXXXXX|XXXXXXXXXX|               |
++-------------------------------------+
+15 KB free, allocate 10 KB
++--------------------------------------+
+|XXXXXXXXXX|XXXXXXXXXX|XXXXXXXXXX|     |
++--------------------------------------+
+5 KB free, free block #2
++--------------------------------------+
+|XXXXXXXXXX|          |XXXXXXXXXX|     |
++--------------------------------------+
+15 KB free, allocate 5 KB first fit
++---------------------------------------+
+|XXXXXXXXXX|XXXXX|     |XXXXXXXXXX|     |
++---------------------------------------+
+10 KB free, allocate 10 KB, fail since
+the two blocks left have sizes 5 KB and
+5 KB respectively
++---------------------------------------+
+|XXXXXXXXXX|XXXXX|     |XXXXXXXXXX|     |
++---------------------------------------+
+!!! Failed Allocation under first fit
+
+Best fit strategy      35 KB pool
+
++-----------------------------------+
+|                                   |
++-----------------------------------+
+35 KB Free, allocate 10 KB
++------------------------------------+
+|XXXXXXXXXX|                         |
++------------------------------------+
+25 KB free, allocate 10 KB
++-------------------------------------+
+|XXXXXXXXXX|XXXXXXXXXX|               |
++-------------------------------------+
+15 KB free, allocate 10 KB
++--------------------------------------+
+|XXXXXXXXXX|XXXXXXXXXX|XXXXXXXXXX|     |
++--------------------------------------+
+5 KB free, free block #2
++--------------------------------------+
+|XXXXXXXXXX|          |XXXXXXXXXX|     |
++--------------------------------------+
+15 KB free, allocate 5 KB best fit
++--------------------------------------+
+|XXXXXXXXXX|          |XXXXXXXXXX|XXXXX|
++--------------------------------------+
+10 KB free, allocate 10 KB
++--------------------------------------+
+|XXXXXXXXXX|XXXXXXXXXX|XXXXXXXXXX|XXXXX|
++--------------------------------------+
+0 KB free, allocated 35 KB
+Memory pool fully allocated

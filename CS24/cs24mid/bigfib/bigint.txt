@@ -1,0 +1,183 @@
+------------------------------------------------------------------------------
+1)  Pseudocode for __add_bigint
+
+/**
+ * First, pure pseudocode (C like)
+ */
+
+// accumulate into b
+__add_bigint(bigint *a, bigint *b, size_t size) {
+    if (size == 0) {
+        return 1                  \\ Check for zero size
+    } 
+    int64 carry = 0;              \\ variable equivalent to carry flag.
+    for i in range(0,size) { 
+        b[i] += a[i] + carry      \\ Accumulate into b
+        if (carry_flag == true) { \\ Keep track of carry flag
+            carry = 1 
+        } else { 
+            carry = 0 
+        } 
+    } 
+    if (carry_flag == true) {     \\ Return 0 if overflow
+            return 0 
+    } else { 
+            return 1              \\ Return 1 if normal exit
+    }
+}
+
+/**
+ * First we will rewrite the return conditions with jumps and labels 
+ */
+
+__add_bigint(bigint *a, bigint *b, size_t size) {
+    if (size == 0) {
+        GOTO RETURN_NO_CARRY       \\ Check for zero size
+    }
+    int64 carry = 0;               \\ variable equivalent to carry flag.
+    for i in range(0,size) {
+        b[i] += a[i] + carry       \\ perform b += a
+        if (carry_flag == true) {  \\ Keep track of carry flag
+            carry = 1
+        } else {
+            carry = 0
+        }
+    }
+    if(carry) {
+        goto RETURN_CARRY
+    }
+
+    RETURN_CARRY:
+            return 0               \\ Return overflow signal 
+    RETURN_NO_CARRY:
+            return 1               \\ Return normal exit status
+}
+
+
+/**
+ * Now we rewrite the for loop with labels and jumps
+ */
+
+__add_bigint(bigint *a, bigint *b, size_t size) {
+    if (size == 0) {
+        GOTO RETURN_NO_CARRY          \\ check for zero size
+    }
+    int64 carry = 0;                  \\ some variables we'll be using
+    
+    int i = 0
+    ADD_LOOP:
+        b[i] += a[i] + carry          \\ accumulate into b
+        if (carry_flag == true) {     \\ keep track of carry and addition
+            carry = 1
+        } else {
+            carry = 0
+        }
+
+        i++
+        size--
+
+        if (size != 0) {              \\ check if we have looped to the end
+         goto ADD_LOOP
+        }
+
+    if(carry) {                       \\ Check the return conditions to
+        goto RETURN_CARRY             \\ determine exit status
+    }
+
+    RETURN_CARRY:
+        return 0
+    RETURN_NO_CARRY:
+        return 1
+}
+
+
+
+/**
+ * Now we write in assembly like statements
+ */
+
+
+__add_bigint
+    compare 0, size
+    jump if zero to RETURN_NO_CARRY    \\ check for zero size
+    int i = 0
+    clear carry flag                   \\ clear flag so we don't accidentally
+                                       \\ add when we shouldn't
+ADD_LOOP:
+    adc a[i], b[i]
+    increment i
+    decrement size
+    jump not zero ADD_LOOP             \\ determine whether we need to loop
+    jump not carry RETURN_NO_CARRY     \\ determine exit status
+    
+RETURN_CARRY:                          \\ Signal overflow
+    return 0
+    
+RETURN_NO_CARRY:                       \\ Signal normal return
+    return 1
+
+
+
+/**
+ * Now we write full assembly (from bigint_asm.s)
+ */
+
+
+__add_bigint:
+    cmp  $0, %rdx              # checks whether we a have a nonzero size
+    jz   RETURN_NO_CARRY
+    movq $0, %r8               # initialize offset variable
+    clc                        # clear carry flag
+
+ADD_LOOP:
+    movq (%rdi, %r8, 8), %rcx  # move a[i] into a temporary element
+    adc  %rcx, (%rsi, %r8, 8)  # accumulate a[i] into b[i]
+    inc  %r8                   # increment the counter variable
+    dec  %rdx                  # decrement the loop variable
+    jnz  ADD_LOOP              # exit loop variable if we reach the end
+    jnc  RETURN_NO_CARRY       # if we don't overflow, goto normal return
+
+RETURN_CARRY:                  # irregular return, overflow detected, 
+    movq $0, %rax              # return 1
+    ret
+    
+RETURN_NO_CARRY:               # normal return, no overflow, return 1
+    movq $1, %rax              # move 0 into the return register
+    ret                        # return 0
+
+
+
+
+------------------------------------------------------------------------------
+3)  Largest n for fib(n) using four 64-bit quadwords for bigint:
+    over flow occurs at n = 371,
+    thus the largest n is we can compute without overflow is 370
+
+    Finding fib(370) using a 4-quadword bigint.
+    fib(370) = 94,611,056,096,305,838,013,295,371,573,764,256,526,437,182,
+    762,229,865,607,320,618,320,601,813,254,535
+
+    Finding fib(371) using a 4-quadword bigint.
+    0
+    Overflow detected!
+
+------------------------------------------------------------------------------
+4)  Number of 64-bit quadwords required for fib(2000), and value of fib(2000):
+    we need 22 quadword ints to compute fib(2000),
+    
+    Finding fib(2000) using a 21-quadword bigint.
+    1
+    Overflow detected!
+
+    Finding fib(2000) using a 22-quadword bigint.
+    fib(2000) = 4,224,696,333,392,304,878,706,725,602,341,482,782,579,852,
+    840,250,681,098,010,280,137,314,308,584,370,130,707,224,123,599,639,
+    141,511,088,446,087,538,909,603,607,640,194,711,643,596,029,271,983,
+    312,598,737,326,253,555,802,606,991,585,915,229,492,453,904,998,722,
+    256,795,316,982,874,482,472,992,263,901,833,716,778,060,607,011,615,
+    497,886,719,879,858,311,468,870,876,264,597,369,086,722,884,023,654,
+    422,295,243,347,964,480,139,515,349,562,972,087,652,656,069,529,806,
+    499,841,977,448,720,155,612,802,665,404,554,171,717,881,930,324,025,
+    204,312,082,516,817,125
+
+

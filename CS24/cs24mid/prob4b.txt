@@ -1,0 +1,94 @@
+Explicit Allocator Scenario:  Allocation Fails under Best-Fit but not First-Fit
+===============================================================================
+
+* note, each white space/X should correspond to 1kb, X means allocated, space
+means its free, also there are lines | separating the blocks.
+
+First fit strategy      30 KB pool
+
++------------------------------+
+|                              |
++------------------------------+
+30 KB free, allocate 9KB
++-------------------------------+
+|XXXXXXXXX|                     |
++-------------------------------+
+21 KB free, allocate 5 KB
++--------------------------------+
+|XXXXXXXXX|XXXXX|                |
++--------------------------------+
+16 KB free, allocate 4 KB
++---------------------------------+
+|XXXXXXXXX|XXXXX|XXXX|            |
++---------------------------------+
+12 KB free, allocate 12 KB
++---------------------------------+
+|XXXXXXXXX|XXXXX|XXXX|XXXXXXXXXXXX|
++---------------------------------+
+Memory fully allocated, free first block 9 KB
++---------------------------------+
+|         |XXXXX|XXXX|XXXXXXXXXXXX|
++---------------------------------+
+9 KB free, free second occupied block, 4KB
++---------------------------------+
+|         |XXXXX|    |XXXXXXXXXXXX|
++---------------------------------+
+12 KB free, allocate 4 kb
++----------------------------------+
+|XXXX|     |XXXXX|    |XXXXXXXXXXXX|
++----------------------------------+
+9 KB free, free third block and coalesce
++---------------------------------+
+|XXXX|    |XXXXX|                 |
++---------------------------------+
+21 KB free, allocate 17 KB
++---------------------------------+
+|XXXX|    |XXXXX|XXXXXXXXXXXXXXXXX|
++---------------------------------+
+
+
+
+
+
+Best fit strategy      30 KB pool
+
++------------------------------+
+|                              |
++------------------------------+
+30 KB free, allocate 9KB
++-------------------------------+
+|XXXXXXXXX|                     |
++-------------------------------+
+21 KB free, allocate 5 KB
++--------------------------------+
+|XXXXXXXXX|XXXXX|                |
++--------------------------------+
+16 KB free, allocate 4 KB
++---------------------------------+
+|XXXXXXXXX|XXXXX|XXXX|            |
++---------------------------------+
+12 KB free, allocate 12 KB
++---------------------------------+
+|XXXXXXXXX|XXXXX|XXXX|XXXXXXXXXXXX|
++---------------------------------+
+Memory fully allocated, free first block 9 KB
++---------------------------------+
+|         |XXXXX|XXXX|XXXXXXXXXXXX|
++---------------------------------+
+9 KB free, free second occupied block, 4KB
++---------------------------------+
+|         |XXXXX|    |XXXXXXXXXXXX|
++---------------------------------+
+12 KB free, allocate 4 kb
++---------------------------------+
+|         |XXXXX|XXXX|XXXXXXXXXXXX|
++---------------------------------+
+9 KB free, free third occupied block
++---------------------------------+
+|        |XXXXX|XXXX|             |
++---------------------------------+
+21 KB free, allocate 17 KB
++---------------------------------+
+|        |XXXXX|XXXX|             |
++---------------------------------+
+Allocation failed
