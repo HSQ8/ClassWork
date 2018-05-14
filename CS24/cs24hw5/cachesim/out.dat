@@ -1,0 +1,64 @@
+Constructing memory for simulation (in reverse order):
+ * Building memory of size 4000000 bytes
+ * Building cache with a block-size of 32 bytes, 256 cache-sets,
+   and 1 cache-lines per set.  Total cache size is 8192 bytes.
+
+Generating 1000000 random floats to sort.
+Sorting numbers using the heap.
+Checking the results against the sorted inputs.
+
+Memory-Access Statistics:
+
+ * Cache reads=387851976 writes=156711356 hits=531488886 misses=13074446 
+   miss-rate=2.40% random replacement policy
+ * Memory reads=418382272 writes=334897760
+
+Constructing memory for simulation (in reverse order):
+ * Building memory of size 4000000 bytes
+ * Building cache with a block-size of 32 bytes, 256 cache-sets,
+   and 256 cache-lines per set.  Total cache size is 2097152 bytes.
+
+Generating 1000000 random floats to sort.
+Sorting numbers using the heap.
+Checking the results against the sorted inputs.
+
+Memory-Access Statistics:
+
+ * Cache reads=387851976 writes=156711356 hits=543628622 misses=934710 
+   miss-rate=0.17% random replacement policy
+ * Memory reads=29910720 writes=24705632
+
+
+===========================================================================
+
+
+Constructing memory for simulation (in reverse order):
+ * Building memory of size 4000000 bytes
+ * Building cache with a block-size of 32 bytes, 256 cache-sets,
+   and 1 cache-lines per set.  Total cache size is 8192 bytes.
+
+Generating 1000000 random floats to sort.
+Sorting numbers using the heap.
+Checking the results against the sorted inputs.
+
+Memory-Access Statistics:
+
+ * Cache reads=387851976 writes=156711356 hits=531488886 misses=13074446 
+   miss-rate=2.40% LRU replacement policy
+ * Memory reads=418382272 writes=334897760
+
+Constructing memory for simulation (in reverse order):
+ * Building memory of size 4000000 bytes
+ * Building cache with a block-size of 32 bytes, 256 cache-sets,
+   and 256 cache-lines per set.  Total cache size is 2097152 bytes.
+
+Generating 1000000 random floats to sort.
+Sorting numbers using the heap.
+Checking the results against the sorted inputs.
+
+Memory-Access Statistics:
+
+ * Cache reads=387851976 writes=156711356 hits=543855051 misses=708281 
+   miss-rate=0.13% LRU replacement policy
+ * Memory reads=22664992 writes=17551456
+

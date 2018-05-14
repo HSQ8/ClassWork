@@ -64,7 +64,6 @@ unsigned char memory_read_byte(membase_t *mb, addr_t address) {
  */
 void memory_write_byte(membase_t *mb, addr_t address, unsigned char value) {
     memory_t *p_memory = (memory_t *) mb;
-
     assert(address >= 0 && address < p_memory->mem_size);
 
 #if DEBUG_MEMORY

@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-O2 -Wall -Werror
-#CFLAGS=-g -O0 -Wall -Werror
+#CFLAGS=-O2 -Wall -Werror
+CFLAGS=-g -O0 -Wall -Werror
 
 
 all: testmem heaptest apsptest qsorttest

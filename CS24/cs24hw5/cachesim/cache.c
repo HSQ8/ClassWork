@@ -13,7 +13,7 @@
 /* Set this to 0 to activate your custom replacement policy, which is
  * hopefully smarter and better than a random replacement policy!
  */
-#define RANDOM_REPLACEMENT_POLICY 1
+#define RANDOM_REPLACEMENT_POLICY 0
 
 
 /* Local functions used by the cache implementation, roughly in order of
@@ -127,6 +127,7 @@ unsigned char cache_read_byte(membase_t *mb, addr_t address) {
     
     /* Return the byte read by the requester. */
     p_cache->num_reads++;
+    p_line->time_modified = clock_tick();
     return p_line->block[block_offset];
 }
 
@@ -141,6 +142,7 @@ void cache_write_byte(membase_t *mb, addr_t address, unsigned char value) {
     p_cache->num_writes++;
     p_line->block[block_offset] = value;
     p_line->dirty = 1;
+    p_line->time_modified = clock_tick();
 }
 
 
@@ -284,7 +286,7 @@ cacheline_t *resolve_cache_access(cache_t *p_cache, addr_t address) {
  */
 addr_t get_offset_in_block(cache_t *p_cache, addr_t address) {
     uint32_t num_bits = p_cache->block_offset_bits;
-    uint32_t mask = (1 << num_bits) - 1
+    uint32_t mask = (1 << num_bits) - 1;
     return address & mask;
 }
 
@@ -307,10 +309,12 @@ void decompose_address(cache_t *p_cache, addr_t address,
     assert(set != NULL);
     assert(offset != NULL);
 
-    uint32_t set_addr_mask = (1 << p_cache->sets_addr_bits);
+    uint32_t set_addr_mask = (1 << (p_cache->sets_addr_bits)) - 1;
     *offset = get_offset_in_block(p_cache, address);
     *set = (address >> (p_cache->block_offset_bits)) & set_addr_mask;
-    *tag = (address >> (p_cache->sets_addr_bits));
+    *tag = (address >> (p_cache->sets_addr_bits + 
+        p_cache->block_offset_bits));
+
 }
 
 
@@ -320,8 +324,9 @@ void decompose_address(cache_t *p_cache, addr_t address,
  * the memory.
  */
 addr_t get_block_start_from_address(cache_t *p_cache, addr_t address) {
-    /* TODO:  IMPLEMENT */
-    return 0;
+    uint32_t num_bits = p_cache->block_offset_bits;
+    uint32_t block_start = (address >> num_bits) << num_bits;
+    return block_start;
 }
 
 
@@ -332,8 +337,13 @@ addr_t get_block_start_from_address(cache_t *p_cache, addr_t address) {
  */
 addr_t get_block_start_from_line_info(cache_t *p_cache,
                                       addr_t tag, addr_t set_no) {
-    /* TODO:  IMPLEMENT */
-    return 0;
+    uint32_t sets_addr_bits = p_cache->sets_addr_bits;
+    uint32_t block_offset_bits = p_cache->block_offset_bits;
+    addr_t block_start = tag;
+    block_start <<= sets_addr_bits;
+    block_start |= set_no;
+    block_start <<= block_offset_bits;
+    return block_start;
 }
 
 
@@ -347,8 +357,12 @@ cacheline_t * find_line_in_set(cacheset_t *p_set, addr_t tag) {
 #if DEBUG_CACHE
     printf(" * Finding line with tag %u in cache set:\n", tag);
 #endif
-
-    /* TODO:  IMPLEMENT */
+    int i;
+    for (i = 0; i < p_set->num_lines; ++i) {
+        if(p_set->cache_lines[i].tag == tag && p_set->cache_lines[i].valid) {
+            found_line = &(p_set->cache_lines[i]);
+        }
+    }
 
     return found_line;
 }
@@ -362,14 +376,34 @@ cacheline_t * find_line_in_set(cacheset_t *p_set, addr_t tag) {
  */
 cacheline_t * choose_victim(cacheset_t *p_set) {
     cacheline_t *victim = NULL;
+    cacheline_t *current_victim;
     int i_victim;
+    uint64_t current_time;
+
     
 #if RANDOM_REPLACEMENT_POLICY
     /* Randomly choose a victim line to evict. */
     i_victim = rand() % p_set->num_lines;
     victim = p_set->cache_lines + i_victim;
 #else
-    /* TODO:  Implement the LRU eviction policy. */
+    current_victim = victim;
+    current_time = UINT64_MAX;
+    for (i_victim = 0; i_victim < p_set->num_lines; ++i_victim) {
+        victim = p_set->cache_lines + i_victim;
+        /* In the event we see an invalid line, immediately return */
+        if (!victim->valid) {
+            return victim;
+        } else {
+            /* Attempt to find the smallest time, aka least recent */
+            if (victim->time_modified < current_time) {
+                current_victim = victim;
+                current_time = victim->time_modified;
+            }
+        }
+
+    }
+    return current_victim;
+    /* Should not reach next line */
     abort();
 #endif
     

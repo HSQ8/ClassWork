@@ -3,10 +3,20 @@
 
 
 #include "membase.h"
+#include <limits.h>
+
+
 
 
 /* This struct represents to a cache line within a cache set. */
 typedef struct cacheline_t {
+    /**
+     * A counter that updates with the last time access every time
+     * this cacheline is accessed. This allows us to implement a 
+     * least recent replacement strategy.
+     */
+    uint64_t time_modified;
+
     /* The index of the cache line.  This is mainly for informational and
      * debugging purposes; it is not used in the normal operation of the
      * cache.
