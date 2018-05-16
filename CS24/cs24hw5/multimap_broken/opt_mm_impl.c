@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 #include "multimap.h"
-#define NULL_INDEX -1
 
+#define NULL_INDEX -1
 
 /*============================================================================
  * TYPES
@@ -18,11 +18,12 @@
  *============================================================================*/
 
  /* Represents a value that is associated with a given key in the multimap. */
+struct multimap;
+struct multimap_node;
 typedef struct multimap_value {
     int value;
     struct multimap_value *next;
 } multimap_value;
-
 
 /* Represents a key and its associated values in the multimap, as well as
  * pointers to the left and right child nodes in the multimap. */
@@ -49,16 +50,15 @@ typedef struct multimap_node {
      * hold keys that are strictly greater than this node's key.
      */
     int64_t right_child;
+
+
 } multimap_node;
 
 
 /* The entry-point of the multimap data structure. */
 struct multimap {
-    multimap_node *root;
-    
+    struct multimap_node *root;
     int64_t size;
-    
-    /* This is also the index of the next available node*/
     int64_t num_nodes;
 };
 
@@ -76,7 +76,7 @@ multimap_node * find_mm_node(multimap *mm, int key,
                              int create_if_not_found);
 
 void free_multimap_values(multimap_value *values);
-void free_multimap_node(multimap_node *node, multimap_node* root);
+void free_multimap_node(multimap_node *node, multimap_node *root);
 void resize_multiheap_levels(multimap* mm);
 
 
@@ -91,8 +91,10 @@ multimap_node * alloc_mm_node() {
     multimap_node *node = malloc(sizeof(multimap_node));
     bzero(node, sizeof(multimap_node));
 
+
     return node;
 }
+
 
 
 /* This helper function searches for the multimap node that contains the
@@ -104,13 +106,21 @@ multimap_node * alloc_mm_node() {
 multimap_node * find_mm_node(multimap *mm, int key,
                              int create_if_not_found) {
     multimap_node *node;
+    // in this strategy, we keep indicies that we then translate into
+    // pointers everytime we need to return a pointer
+    // 
+    // also, in this case, we compute the level based on the index position
+    // and the can extend the array as we please
+    // we always maintain a node* to the root as a basis for computing 
+    // any pointers we need
+    // will have to mark null indicies with NULL_INDEX 
+    // 
 
     /* If the entire multimap is empty, the root will be NULL. */
     if (mm->root == NULL) {
         if (create_if_not_found) {
             mm->root = alloc_mm_node();
             mm->root->key = key;
-            /* My implementation*/
             mm->size = 1;
             mm->num_nodes = 1;
             mm->root->left_child = NULL_INDEX;
@@ -129,17 +139,20 @@ multimap_node * find_mm_node(multimap *mm, int key,
         if (node->key > key) {   /* Follow left child */
             if (node->left_child == NULL_INDEX && create_if_not_found) {
                 /* No left child, but caller wants us to create a new node. */
-                
-                uint64_t index = node - mm->root;
+                /* computes index of parent in array*/
+                uint32_t index = node - mm->root;
                 if ( mm->num_nodes == mm->size) {
                     resize_multiheap_levels(mm);
                     node = mm->root + index;
                 }
                 multimap_node *new = mm->root + mm->num_nodes;
-
                 new->key = key;
+                /* Initializes values that keep track of our block
+                 * memory
+                 */
                 new->num_values = 0;
                 new->num_spaces = 0;
+
                 new->left_child = NULL_INDEX;
                 new->right_child = NULL_INDEX;
 
@@ -155,18 +168,23 @@ multimap_node * find_mm_node(multimap *mm, int key,
         }
         else {                   /* Follow right child */
             if (node->right_child == NULL_INDEX && create_if_not_found) {
+                // we only need to extend when we follow right child
+
                 /* No right child, but caller wants us to create a new node. */
-                
-                uint64_t index = node - mm->root;
+                int32_t index = node - mm->root;
                 if ( mm->num_nodes == mm->size) {
                     resize_multiheap_levels(mm);
                     node = mm->root + index;
                 }
                 multimap_node *new = mm->root + mm->num_nodes;
-                
                 new->key = key;
+                
+                /* Initializes values that keep track of our block
+                 * memory
+                 */
                 new->num_values = 0;
                 new->num_spaces = 0;
+
                 new->left_child = NULL_INDEX;
                 new->right_child = NULL_INDEX;
 
@@ -180,6 +198,7 @@ multimap_node * find_mm_node(multimap *mm, int key,
                 node = mm->root + node->right_child;
             }
         }
+
         if (node == NULL) {
             break;
         }
@@ -187,15 +206,18 @@ multimap_node * find_mm_node(multimap *mm, int key,
     return node;
 }
 
+/**
+ * double the memory pool every time we run out of space
+ * @param root [description]
+ */
 void resize_multiheap_levels(multimap* mm) {
     multimap_node* newzone = (multimap_node *) realloc(mm->root, 
             mm->size * 4 * sizeof(multimap_node));
+    printf("size requested %lu\n", mm->size * 3 * sizeof(multimap_node));
     if (newzone != NULL) {
         mm->root = newzone;
         mm->size *= 4;
     } else {
-        printf("size requested %lu\n", mm->size * 4 *
-         sizeof(multimap_node));
         printf("%s\n", "failed to realloc array");
         exit(1);
     }
@@ -204,7 +226,13 @@ void resize_multiheap_levels(multimap* mm) {
 
 /* This helper function frees all values in a multimap node's value-list. */
 void free_multimap_values(multimap_value *values) {
-    free(values);
+    /* Only root block needs to be freed, since it is now one continuous
+     * block
+     */
+    if (values != NULL) {
+        printf("%s\n", "free values");
+        free(values);
+    }
 }
 
 
@@ -212,6 +240,10 @@ void free_multimap_values(multimap_value *values) {
  * value-list.
  */
 void free_multimap_node(multimap_node *node, multimap_node* root) {
+    if (node == NULL) {
+        return;
+    }
+
     /* Free the children first. */
     if (node->left_child != NULL_INDEX) {
         free_multimap_node(root + node->left_child, root);
@@ -346,21 +378,24 @@ int mm_contains_pair(multimap *mm, int key, int value) {
 /* This helper function is used by mm_traverse() to traverse every pair within
  * the multimap.
  */
-void mm_traverse_helper(multimap_node *node, void (*f)(int key, int value),
-    multimap_node *root) {
+void mm_traverse_helper(multimap_node *root, multimap_node *node, 
+    void (*f)(int key, int value)) {
     multimap_value *curr;
 
+    if (node == NULL)
+        return;
+
     if (node->left_child != NULL_INDEX) {
-        mm_traverse_helper(root + node->left_child, f, root);
+        mm_traverse_helper(root, root + node->left_child, f);
     }
+
     curr = node->values;
     while (curr != NULL) {
         f(node->key, curr->value);
         curr = curr->next;
     }
-
     if (node->right_child != NULL_INDEX) {
-        mm_traverse_helper(root + node->right_child, f, root);
+        mm_traverse_helper(root, root + node->right_child, f);
     }
 }
 
@@ -369,6 +404,7 @@ void mm_traverse_helper(multimap_node *node, void (*f)(int key, int value),
  * pair to the specified function.
  */
 void mm_traverse(multimap *mm, void (*f)(int key, int value)) {
-    mm_traverse_helper(mm->root, f, mm->root);
+    /* We pass in two of the same parameter due to the recursive definition*/
+    mm_traverse_helper(mm->root, mm->root, f);
 }
 

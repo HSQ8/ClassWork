@@ -1,0 +1,122 @@
+Multimap Caching Performance
+============================
+
+a)  Size of hardware cache lines:
+
+    32768 bytes
+    32768 bytes
+    262144 bytes
+    4194304 bytes
+
+
+b)  Output of mmperf:
+
+
+This program measures multimap read performance by doing the following, for
+various kinds of usage patterns:
+
+ * First, a large number of randomly generated (key, value) pairs are inserted
+   into an empty multimap.
+
+ * Next, more (key, value) pairs are randomly generated, and the multimap is
+   probed to see if each pair is in the map.  The amount of wall-clock time
+   taken for this step is measured and used to estimate the time-per-probe
+   of the map.
+
+ * Finally, the program prints out how many of the generated (key, value) pairs
+   were in the map.  This number should not change regardless of optimizations
+   to the data structure, because the same random seed is always used at the
+   start of the program.
+
+Testing multimap performance:  300000 pairs, 1000000 probes, random keys.
+Adding 300000 randomly generated pairs to multimap.
+Keys in range [0, 50), values in range [0, 1000).
+Probing multimap 1000000 times with randomly generated test-pairs.
+Keys in range [0, 50), values in range [0, 1000).
+997144 out of 1000000 test-pairs were in the map (99.7%)
+Total wall-clock time:  30.25 seconds       μs per probe:  30.251 μs
+
+Testing multimap performance:  300000 pairs, 1000000 probes, incrementing keys.
+Adding 300000 randomly generated pairs to multimap.
+Keys in range [0, 50), values in range [0, 1000).
+Probing multimap 1000000 times with randomly generated test-pairs.
+Keys in range [0, 50), values in range [0, 1000).
+997715 out of 1000000 test-pairs were in the map (99.8%)
+Total wall-clock time:  64.87 seconds       μs per probe:  64.866 μs
+
+Testing multimap performance:  300000 pairs, 1000000 probes, decrementing keys.
+Adding 300000 randomly generated pairs to multimap.
+Keys in range [0, 50), values in range [0, 1000).
+Probing multimap 1000000 times with randomly generated test-pairs.
+Keys in range [0, 50), values in range [0, 1000).
+997325 out of 1000000 test-pairs were in the map (99.7%)
+Total wall-clock time:  64.70 seconds       μs per probe:  64.703 μs
+
+Testing multimap performance:  15000000 pairs, 1000000 probes, random keys.
+Adding 15000000 randomly generated pairs to multimap.
+Keys in range [0, 100000), values in range [0, 50).
+Probing multimap 1000000 times with randomly generated test-pairs.
+Keys in range [0, 100000), values in range [0, 50).
+949586 out of 1000000 test-pairs were in the map (95.0%)
+Total wall-clock time:  6.77 seconds        μs per probe:  6.775 μs
+
+Testing multimap performance:  100000 pairs, 50000 probes, incrementing keys.
+Adding 100000 randomly generated pairs to multimap.
+Keys in range [0, 100000), values in range [0, 50).
+Probing multimap 50000 times with randomly generated test-pairs.
+Keys in range [0, 100000), values in range [0, 50).
+976 out of 50000 test-pairs were in the map (2.0%)
+Total wall-clock time:  236.40 seconds      μs per probe:  4728.022 μs
+
+Testing multimap performance:  100000 pairs, 50000 probes, decrementing keys.
+Adding 100000 randomly generated pairs to multimap.
+Keys in range [0, 100000), values in range [0, 50).
+Probing multimap 50000 times with randomly generated test-pairs.
+Keys in range [0, 100000), values in range [0, 50).
+980 out of 50000 test-pairs were in the map (2.0%)
+Total wall-clock time:  223.60 seconds      μs per probe:  4471.999 μs
+
+
+c)  Explanation of tests:
+    
+    the first three tests, notice that there are alot more unique values
+    than there are keys, this implies that our multimap generated will be
+    a tree with not that many nodes but with each node having a very long
+    linked list, thus this first three tests are testing for the 
+    data locality of the linked lists.
+
+    The second three tests, the keys range is much greater than the values
+    range, this means that the pairs generated will be much result in a
+    tree with much larger number of nodes and less terms in the multimap
+    value in the linked list. This second three tests are testing for the
+    data locality of the tree itself.
+
+
+e)  Explanation of your optimizations:
+    
+    The first problem that I was trying to address is the number of values
+    per node. As you probably know, in the original implementation, we
+    have very few nodes with many values each, which results in lots of
+    terms in the linked list that was scattered throughout memory, which is
+    horrible for locality. My solution to that is reorganize the linked list
+    into a array like structure within a continuous block of memory.
+
+    We represent the linked list the same way as a linked list, with next
+    pointers to the next node as to not modify any original traversal code.
+    Each time a new value is added, we write a new value struct to the 
+    end of the block of memory we allocate. If it our predefined block is
+    already full, then we realloc the block to double its size and copy the 
+    linked list over. Furthermore, we readjust the pointers in the linked 
+    list so that it can be traversed normally in the block. Thus essentially
+    the structs are laid out in the pool of memory like an array, but still
+    traversed with linked list interface. 
+
+    My optimization allows all values to be within the same continuous block
+    for a single key. Thus this improves locality of the value accession
+    for a single key. Since cache is faster than memory, then we can 
+    read the values faster if they're already in cache, which my optimization
+    increases the chance of.
+
+
+f)  Output of ommperf:
+
