@@ -29,8 +29,8 @@ typedef struct multimap_value {
 typedef struct multimap_node {
     /* The key-value that this multimap node represents. */
     int key;
-    uint64_t num_values;
-    uint64_t num_spaces;
+    int64_t num_values;
+    int64_t num_spaces;
 
     /* A linked list of the values associated with this key in the multimap. */
     multimap_value *values;
@@ -76,7 +76,7 @@ multimap_node * find_mm_node(multimap *mm, int key,
                              int create_if_not_found);
 
 void free_multimap_values(multimap_value *values);
-void free_multimap_node(multimap_node *node, multimap_node* root);
+void free_multimap_node(multimap_node *node, multimap* mm);
 void resize_multiheap_levels(multimap* mm);
 
 
@@ -130,8 +130,8 @@ multimap_node * find_mm_node(multimap *mm, int key,
             if (node->left_child == NULL_INDEX && create_if_not_found) {
                 /* No left child, but caller wants us to create a new node. */
                 
-                uint64_t index = node - mm->root;
-                if ( mm->num_nodes == mm->size) {
+                int64_t index = node - mm->root;
+                if ( mm->num_nodes >= mm->size) {
                     resize_multiheap_levels(mm);
                     node = mm->root + index;
                 }
@@ -157,8 +157,8 @@ multimap_node * find_mm_node(multimap *mm, int key,
             if (node->right_child == NULL_INDEX && create_if_not_found) {
                 /* No right child, but caller wants us to create a new node. */
                 
-                uint64_t index = node - mm->root;
-                if ( mm->num_nodes == mm->size) {
+                int64_t index = node - mm->root;
+                if ( mm->num_nodes >= mm->size) {
                     resize_multiheap_levels(mm);
                     node = mm->root + index;
                 }
@@ -211,18 +211,11 @@ void free_multimap_values(multimap_value *values) {
 /* This helper function frees a multimap node, including its children and
  * value-list.
  */
-void free_multimap_node(multimap_node *node, multimap_node* root) {
-    /* Free the children first. */
-    if (node->left_child != NULL_INDEX) {
-        free_multimap_node(root + node->left_child, root);
+void free_multimap_node(multimap_node *node, multimap* mm) {
+    int i;
+    for (i = 0; i < mm->num_nodes; ++i) {
+        free_multimap_values(mm->root[i].values);
     }
-
-    if (node->left_child != NULL_INDEX) {
-        free_multimap_node(root + node->right_child, root);
-    }
-
-    /* Free the list of values. */
-    free_multimap_values(node->values);
 }
 
 
@@ -239,7 +232,7 @@ multimap * init_multimap() {
  */
 void clear_multimap(multimap *mm) {
     assert(mm != NULL);
-    free_multimap_node(mm->root, mm->root);
+    free_multimap_node(mm->root, mm);
     free(mm->root);
     mm->root = NULL;
 }
