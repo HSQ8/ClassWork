@@ -308,8 +308,9 @@ void decompose_address(cache_t *p_cache, addr_t address,
     assert(tag != NULL);
     assert(set != NULL);
     assert(offset != NULL);
-
+    /* Get mask */
     uint32_t set_addr_mask = (1 << (p_cache->sets_addr_bits)) - 1;
+    /* Apply extractions */
     *offset = get_offset_in_block(p_cache, address);
     *set = (address >> (p_cache->block_offset_bits)) & set_addr_mask;
     *tag = (address >> (p_cache->sets_addr_bits + 
@@ -325,6 +326,7 @@ void decompose_address(cache_t *p_cache, addr_t address,
  */
 addr_t get_block_start_from_address(cache_t *p_cache, addr_t address) {
     uint32_t num_bits = p_cache->block_offset_bits;
+    /* Clears the lower number of bits. */
     uint32_t block_start = (address >> num_bits) << num_bits;
     return block_start;
 }
@@ -337,12 +339,10 @@ addr_t get_block_start_from_address(cache_t *p_cache, addr_t address) {
  */
 addr_t get_block_start_from_line_info(cache_t *p_cache,
                                       addr_t tag, addr_t set_no) {
-    uint32_t sets_addr_bits = p_cache->sets_addr_bits;
-    uint32_t block_offset_bits = p_cache->block_offset_bits;
     addr_t block_start = tag;
-    block_start <<= sets_addr_bits;
+    block_start <<= p_cache->sets_addr_bits;
     block_start |= set_no;
-    block_start <<= block_offset_bits;
+    block_start <<= p_cache->block_offset_bits;
     return block_start;
 }
 
@@ -359,11 +359,12 @@ cacheline_t * find_line_in_set(cacheset_t *p_set, addr_t tag) {
 #endif
     int i;
     for (i = 0; i < p_set->num_lines; ++i) {
-        if(p_set->cache_lines[i].tag == tag && p_set->cache_lines[i].valid) {
-            found_line = &(p_set->cache_lines[i]);
+        if (p_set->cache_lines[i].tag == tag && 
+            p_set->cache_lines[i].valid) {
+            found_line = & (p_set->cache_lines[i]);
+            return found_line;
         }
     }
-
     return found_line;
 }
 
@@ -376,9 +377,7 @@ cacheline_t * find_line_in_set(cacheset_t *p_set, addr_t tag) {
  */
 cacheline_t * choose_victim(cacheset_t *p_set) {
     cacheline_t *victim = NULL;
-    cacheline_t *current_victim;
     int i_victim;
-    uint64_t current_time;
 
     
 #if RANDOM_REPLACEMENT_POLICY
@@ -386,8 +385,12 @@ cacheline_t * choose_victim(cacheset_t *p_set) {
     i_victim = rand() % p_set->num_lines;
     victim = p_set->cache_lines + i_victim;
 #else
+    /* Initialize Variables for least recent policy */
+    uint64_t current_time;
+    cacheline_t *current_victim;
     current_victim = victim;
     current_time = UINT64_MAX;
+    /* Search through all potential lines. */
     for (i_victim = 0; i_victim < p_set->num_lines; ++i_victim) {
         victim = p_set->cache_lines + i_victim;
         /* In the event we see an invalid line, immediately return */
@@ -403,7 +406,7 @@ cacheline_t * choose_victim(cacheset_t *p_set) {
 
     }
     return current_victim;
-    /* Should not reach next line */
+    /* Should not reach next line  if we chose LEAST RECENT POLICY. */
     abort();
 #endif
     

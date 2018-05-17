@@ -12,6 +12,10 @@ then miss rate =
 misses / total references = 22727273 / 750 e6 = 3.03 %
 
 b. assuming the same conditions but now instructions executed is = 15e8
+(double the performance)
+
+let x be the number of hits
+let y be the number of misses
 
 x + 100 y = 3 * 10^9
 x + y = 15 * 10^8
@@ -19,5 +23,6 @@ solve the system
 hits = x = 1484848485
 misses = y = 15151515
 then miss rate is 15151515/15e8 =  1.01 %,
-thus you need to decrease miss rate to 1.01 %
+thus you need to decrease miss rate to 1.01 % by reducing the rate by
+2.02 %.
 
