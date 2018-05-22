@@ -9,7 +9,7 @@ fact:
         jmp     fact_return
 
 fact_continue:
-        pushq   %rdi           # Save our argument n before recursive call
+        pushq   %rdi            # Save our argument n before recursive call
         decl    %edi            # Compute n-1 for arg in recursive call
         call    fact            # Make recursive call; answer will be in eax
 
