@@ -1,5 +1,11 @@
 #include <stdint.h>
 
+/**
+ * output takes a buffer to the data to print and the size of the data
+ * @param  data pointer to data buffer
+ * @param  size size of buffer
+ * @return      number of bytes actually written
+ */
 int64_t output(void *data, uint64_t size);
 
 

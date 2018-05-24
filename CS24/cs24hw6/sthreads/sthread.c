@@ -128,9 +128,41 @@ static void enqueue_thread(Thread *threadp) {
  * This function is global because it needs to be called from the assembly.
  */
 ThreadContext *__sthread_scheduler(ThreadContext *context) {
-
-    /* TODO:  Replace these lines with your implementation */
-    /* TODO */ assert(0); /* TODO */
+    /* Checks for initial case when context passed in is NULL */
+    if (current != NULL) {
+        current->context = context;
+        if (current->state == ThreadFinished) {
+            /* If thread is finished, free up memory of the thread. */
+            __sthread_delete(current);
+        } else if (current->state == ThreadRunning) {
+            /* If thread is running, then we put in in ready queue. */
+            current->state = ThreadReady;
+            enqueue_thread(current);
+        } else if(current->state == ThreadBlocked) {
+            /* If thread is blocked, then we put in in blocked queue. */
+            enqueue_thread(current);
+        }
+    }
+    /* Code for getting thread from queue to set up the next thread
+     * for execution.
+     */
+    if (!queue_empty(&ready_queue)) {
+        /* If there are available threads to run, run them */
+        current = queue_take(&ready_queue);
+        current->state = ThreadRunning;
+    } else if (queue_empty(&ready_queue)) {
+        /* This case handles if we don't have any threads to run and
+         * all threads are blocked, or we just don't have any threads
+         * at all and all threads are finished.
+         */
+        if (queue_empty(&blocked_queue)) {
+            printf("%s\n", "All threads finished");
+            exit(0);
+        } else {
+            printf("%s\n", "Deadlock Detected");
+            exit(1);
+        }
+    }
 
     /* Return the next thread to resume executing. */
     return current->context;
@@ -156,9 +188,39 @@ void sthread_start(void)
  * structure, and it adds the thread to the Ready queue.
  */
 Thread * sthread_create(void (*f)(void *arg), void *arg) {
-    /* TODO:  Replace this function's body with your implementation */
-    /* TODO */ assert(0); /* TODO */
-    return NULL;
+    /**
+     * Allocates memory for new_thread, try and catch any failures of 
+     * malloc if we run out of memory.
+     */
+    Thread *new_thread = (Thread *) malloc(sizeof(Thread));
+    if (new_thread == NULL) {
+        printf("%s\n", "malloc failed");
+        exit(1);
+    }
+
+    /**
+     * Allocates memory for stack, try and catch any failures of 
+     * malloc if we run out of memory.
+     */
+    new_thread->memory = malloc(DEFAULT_STACKSIZE);
+    if (new_thread->memory == NULL) {
+        printf("%s\n", "malloc failed");
+        exit(1);
+    }
+    /* Update thread state flag */
+    new_thread->state = ThreadReady;
+    /* Put thread in appropriate queue */
+    enqueue_thread(new_thread);
+    /* Modify stack pointer to end of memory pool because stack 
+     * grows down.
+     */
+    void* stackp = (void *) ((unsigned char *) new_thread->memory + 
+        DEFAULT_STACKSIZE);
+    /* Use the initialize function to populate the context for the first
+     * load of the context.
+     */
+    new_thread->context = __sthread_initialize_context(stackp, f, arg);
+    return new_thread;
 }
 
 
@@ -183,8 +245,13 @@ void __sthread_finish(void) {
  * context, as well as the memory for the Thread struct.
  */
 void __sthread_delete(Thread *threadp) {
-    /* TODO:  Replace this function's body with your implementation */
-    /* TODO */ assert(0); /* TODO */
+    /* Free up stack memory */
+    free(threadp->memory);
+    /* Free the thread struct itself */
+    free(threadp);
+    threadp->memory = NULL;
+    threadp->context = NULL;
+    threadp = NULL;
 }
 
 
