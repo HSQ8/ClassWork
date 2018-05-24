@@ -25,7 +25,7 @@
 static void loop1(void *arg) {
     int i;
     int iarg = (intptr_t) arg;
-    printf("%d%s%d%s\n", iarg, "should print ", iarg, " times.");
+    printf("%d%s%d%s\n", iarg, " should print ", iarg, " times.");
     /* Prints the argument iarg times and yields each time. */
     for (i = 0; i < iarg; ++i) {
         sthread_yield();

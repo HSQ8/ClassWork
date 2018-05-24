@@ -135,6 +135,13 @@ ThreadContext *__sthread_scheduler(ThreadContext *context) {
             /* If thread is finished, free up memory of the thread. */
             __sthread_delete(current);
         } else if (current->state == ThreadRunning) {
+            /* If there is only one thread running, then we return early
+             * and let that thread keep running. This saves the time
+             * we would have spent enqueue and dequeue this one thread.
+             */
+            if (queue_empty(&ready_queue)) {
+                return current->context;
+            }
             /* If thread is running, then we put in in ready queue. */
             current->state = ThreadReady;
             enqueue_thread(current);
