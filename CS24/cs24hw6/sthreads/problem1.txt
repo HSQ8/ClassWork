@@ -1,0 +1,4 @@
+only producer 0's output is used, more accurately, we say that only
+one of the two producers is being scheduled. This is because the 
+producer thread does not yield execution by itself, thus cooperative
+multitasking fails. We do not have a mechanism for preemptive multitasking.
