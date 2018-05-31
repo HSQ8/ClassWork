@@ -43,14 +43,14 @@ struct _semaphore {
  */
 Semaphore *new_semaphore(int init) {
     Semaphore *semp = NULL;
-    /* Malloc some space for semaphore*/
+    /* Malloc some space for semaphore. */
     semp = (Semaphore *) malloc(sizeof(Semaphore));
     if (semp == NULL) {
         printf("%s\n", "Memory allocation for semaphore failed");
         exit(1);
     }
     semp->i = init;
-    /* malloc some space for a queue*/
+    /* malloc some space for a queue. */
     semp->queue = (Queue *) malloc(sizeof(Queue));
     if (semp->queue == NULL) {
         printf("%s\n", "Memory allocation for queue failed");
@@ -66,8 +66,8 @@ Semaphore *new_semaphore(int init) {
  */
 void semaphore_wait(Semaphore *semp) {
     assert(semp != NULL);
-    /* If we don't have resource, we lock then block and update queue*/
-    /* Here we lock the thread since this function isn't reentrant, we 
+    /* If we don't have resource, we lock then block and update queue
+     * Here we lock the thread since this function isn't reentrant, we 
      * modifying some very important shared program states here.
      */
     __sthread_lock();
@@ -82,10 +82,8 @@ void semaphore_wait(Semaphore *semp) {
      * the while loop to check the conditions of the semaphore again.
      */
     while (semp->i == 0) {
-        /* Here we first lock the thread so that we cannot get 
-         * interrupted by the timer interrupt.
-         */
-        /* We add the thread to the semaphore's queue to keep track of it*/
+        
+        /* We add the thread to the semaphore's queue to keep track of it. */
         queue_append(semp->queue, sthread_current());
         /* block the thread so we don't waste cpu power on busy wait.
          * We block after append because block switches, so if block
