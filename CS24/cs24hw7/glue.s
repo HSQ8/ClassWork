@@ -21,13 +21,12 @@ scheduler_lock:         .long   0
         .align 8
         .globl __sthread_lock
 __sthread_lock:
-        movq $1, %rax              # prep a%rax for exchange
-        
+        movl $1, %eax              # prep %eax for exchange
         lock                       # lock the xchg explicitly
-        xchg scheduler_lock, %rax  # perform a lock exchange so we get 
-                                   # value of scheduler_lock into rax 
+        xchg scheduler_lock, %eax  # perform a lock exchange so we get 
+                                   # value of scheduler_lock into eax 
                                    # atomically
-        xor $1, % rax              # xor with 1 will return the opposite
+        xor $1, % eax              # xor with 1 will return the opposite
         ret                        # return
 
 #============================================================================
@@ -36,7 +35,7 @@ __sthread_lock:
         .align 8
         .globl __sthread_unlock
 __sthread_unlock:
-        movq $0, scheduler_lock    # unlock is very simple, it simply unlocks
+        movl $0, scheduler_lock    # unlock is very simple, it simply unlocks
         ret
 
 #============================================================================

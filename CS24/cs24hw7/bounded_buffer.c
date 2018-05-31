@@ -28,11 +28,23 @@ struct _bounded_buffer {
     /* The number of elements currently stored in the buffer */
     int count;
 
-    /* Keep track of empty spaces */
+    /* Semaphore that keeps track of empty spaces, this prevents
+     * bounded buffer overflows by restricting writes whenever there
+     * are no more empty spaces
+     */
     Semaphore *spaces;
-    /* Track number of spaces in buffer*/
+    
+    /* Semaphore that tracks number of spaces in buffer. This helps
+     * prevent underflows / invalid reads since if we have no valid data 
+     * to give out, then the semaphore blocks the thread that attempts to
+     * take resources.
+     */
     Semaphore *resources;
-    /* keep track of the buffer itself so that there are no concurrent writes*/
+    
+    /* Semaphore that keep track of the buffer itself so that 
+     * there are no concurrent accessions. Blocks other threads from
+     * modifying. 
+     */
     Semaphore *bound_buffer_lock;
 
     /* The values in the buffer */
@@ -72,7 +84,12 @@ BoundedBuffer *new_bounded_buffer(int length) {
     bufp->buffer = buffer;
 
     /* allocate some space for semaphores */
+
+    /* We allocate this semaphore with the number of spaces. */
     bufp->spaces = new_semaphore(length);
+    /* resources start with 0 since the our bounded buffer doesn't
+     * any data value yet.
+     */ 
     bufp->resources = new_semaphore(0);
     bufp->bound_buffer_lock = new_semaphore(1);
     return bufp;
@@ -83,11 +100,19 @@ BoundedBuffer *new_bounded_buffer(int length) {
  * thread if the buffer is full.
  */
 void bounded_buffer_add(BoundedBuffer *bufp, const BufferElem *elem) {
-    /* Wait until the buffer has space */
-    
+    /* Wait until the buffer has space
+     * The reason why we can wait on the resource without having a lock
+     * on the buffer itself is because the signal of this resource from
+     * the other function is locked within a buffer lock.Thus when we signal
+     * from another thread, we increase the semaphore count and unblock this
+     * thread, which would then decrease the semaphore and continue to execute
+     */
     semaphore_wait(bufp->spaces);
+
+    /* Once the buffer has space, we will try to obtain a lock
+     * on the buffer itself so we can modify it.
+     */
     semaphore_wait(bufp->bound_buffer_lock);
-    semaphore_signal(bufp->resources);
 
     /* Now the buffer has space.  Copy the element data over. */
     int idx = (bufp->first + bufp->count) % bufp->length;
@@ -97,6 +122,8 @@ void bounded_buffer_add(BoundedBuffer *bufp, const BufferElem *elem) {
 
     bufp->count = bufp->count + 1;
 
+    /*Must signal the other semaphore to increase its counter*/
+    semaphore_signal(bufp->resources);
     semaphore_signal(bufp->bound_buffer_lock);
 }
 
@@ -105,10 +132,19 @@ void bounded_buffer_add(BoundedBuffer *bufp, const BufferElem *elem) {
  * thread if the buffer is empty.
  */
 void bounded_buffer_take(BoundedBuffer *bufp, BufferElem *elem) {
-    /* Wait until the buffer has a value to retrieve */
+    /* Wait until the buffer has a value to retrieve 
+     * The reason why we can wait on the resource without having a lock
+     * on the buffer itself is because the signal of this resource from
+     * the other function is locked within a buffer lock. Thus when we signal
+     * from another thread, we increase the semaphore count and unblock this
+     * thread, which would then decrease the semaphore and continue to execute
+     */
     semaphore_wait(bufp->resources);
+    
+    /* Once the buffer has space, we will try to obtain a lock
+     * on the buffer itself so we can modify it.
+     */
     semaphore_wait(bufp->bound_buffer_lock);
-    semaphore_signal(bufp->spaces);
 
     /* Copy the element from the buffer, and clear the record */
     elem->id  = bufp->buffer[bufp->first].id;
@@ -121,6 +157,11 @@ void bounded_buffer_take(BoundedBuffer *bufp, BufferElem *elem) {
 
     bufp->count = bufp->count - 1;
     bufp->first = (bufp->first + 1) % bufp->length;
+    
+    /* Signal the other semaphore that we have more spaces now that we
+     * took a resource.
+     */
+    semaphore_signal(bufp->spaces);
     semaphore_signal(bufp->bound_buffer_lock);
 }
 

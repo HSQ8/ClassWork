@@ -183,10 +183,15 @@ ThreadContext *__sthread_scheduler(ThreadContext *context) {
 * Start the scheduler.
 */
 void sthread_start(int timer) {
-    if (timer)
-    start_timer();
+    if (timer) {
+        start_timer();
+    }
+    /* Thread start invokes the scheduler, thus we 
+     * obtain a lock so that the timer does not interrupt the scheduler 
+     */
     __sthread_lock();
     __sthread_start();
+    /* Theoretically, we should have an unlock */
     __sthread_unlock();
 }
 
@@ -244,10 +249,14 @@ Thread * sthread_current(void) {
 */
 void __sthread_finish(void) {
     printf("Thread %p has finished executing.\n", (void *) current);
+    /*  sthread finish invokes a switch as we finish executing the
+     *  current thread, thus we must lock to prevent the timer
+     *  from interrupting the switch to another currently active thread.
+     */
     __sthread_lock();
     current->state = ThreadFinished;
     __sthread_switch();
-    __sthread_unlock();
+    __sthread_unlock(); // Henry Sun Approved, but henry also recommends 
 }
 
 
@@ -269,6 +278,9 @@ void __sthread_delete(Thread *threadp) {
 * call the scheduler, and it will pick a new thread to run.
 */
 void sthread_yield() {
+    /* yield invokes a switch, thus we must have a lock to prevent
+     * the timer from interrupting the switch process.
+     */
     __sthread_lock();
     __sthread_switch();
     __sthread_unlock();
@@ -280,6 +292,10 @@ void sthread_yield() {
 * to Blocked, and call the scheduler.
 */
 void sthread_block() {
+    /* sthread_block blocks the current thread and switches to a new 
+     * thread, this process must not be interrupted by the timer. Thus
+     * we obtain a lock.
+     */
     __sthread_lock();
     current->state = ThreadBlocked;
     __sthread_switch();
@@ -292,7 +308,7 @@ void sthread_block() {
 * the ready queue.
 */
 void sthread_unblock(Thread *threadp) {
-
+    __sthread_lock();
 /* Make sure the thread was blocked */
     assert(threadp->state == ThreadBlocked);
 
@@ -302,5 +318,6 @@ void sthread_unblock(Thread *threadp) {
 /* Re-queue it */
     threadp->state = ThreadReady;
     enqueue_thread(threadp);
+    __sthread_unlock();
 }
 
