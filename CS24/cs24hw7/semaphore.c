@@ -67,11 +67,11 @@ void semaphore_wait(Semaphore *semp) {
     /* Here we lock the thread since this function isn't reentrant, we 
      * modifying some very important program states here.
      */
+    __sthread_lock();
     while (semp->i == 0) {
         /* Here we first lock the thread so that we cannot get 
          * interrupted by the timer interrupt.
          */
-        __sthread_lock();
         /* We add the thread to the semaphore's queue to keep track of it*/
         queue_append(semp->queue, sthread_current());
         /* block the thread so we don't waste cpu power 

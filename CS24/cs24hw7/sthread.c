@@ -187,11 +187,17 @@ void sthread_start(int timer) {
         start_timer();
     }
     /* Thread start invokes the scheduler, thus we 
-     * obtain a lock so that the timer does not interrupt the scheduler 
+     * obtain a lock so that the timer does not interrupt the scheduler
+     * because we all scheduler inside start
      */
     __sthread_lock();
     __sthread_start();
-    /* Theoretically, we should have an unlock */
+    /* Theoretically, we should have an unlock thread immediately following
+     * the start after we locked, but since we also unlock inside _restore
+     * there is no need for a redundant lock. 
+     * The reason why we unlock inside restore is because the timer interrupt
+     * calls switch, and since we can't 
+     */
     __sthread_unlock();
 }
 
@@ -268,8 +274,10 @@ void __sthread_finish(void) {
 void __sthread_delete(Thread *threadp) {
     assert(threadp != NULL);
 
+    __sthread_lock();
     free(threadp->memory);
     free(threadp);
+    __sthread_unlock();
 }
 
 

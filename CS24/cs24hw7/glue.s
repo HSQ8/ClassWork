@@ -110,7 +110,7 @@ __sthread_restore:
         popq    %rbx
         popq    %rax
 
-        call __sthread_unlock
+        call __sthread_unlock # we call unlock here because the timer 
         ret
 
 
