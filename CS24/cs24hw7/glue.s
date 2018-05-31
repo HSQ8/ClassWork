@@ -111,6 +111,12 @@ __sthread_restore:
         popq    %rax
 
         call __sthread_unlock # we call unlock here because the timer 
+                              # The reason why we unlock inside restore is 
+                              # because the timer interrupt
+                              # calls switch, and since the timer should 
+                              # not unlock inside itself,
+                              # we should unlock from within restore 
+                              # after switch.
         ret
 
 

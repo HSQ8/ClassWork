@@ -196,9 +196,9 @@ void sthread_start(int timer) {
      * the start after we locked, but since we also unlock inside _restore
      * there is no need for a redundant lock. 
      * The reason why we unlock inside restore is because the timer interrupt
-     * calls switch, and since we can't 
+     * calls switch, and since the timer should not unlock inside itself,
+     * we should unlock from within restore after switch.
      */
-    __sthread_unlock();
 }
 
 /*
@@ -208,6 +208,12 @@ void sthread_start(int timer) {
 * structure, and it adds the thread to the Ready queue.
 */
 Thread * sthread_create(void (*f)(void *arg), void *arg) {
+    /* We must lock in create because we are initializing 
+     * threads, which invokes malloc, which is not reentrant,
+     * which implies that sthread create is also not reentrant
+     * which means we should lock it.
+     */
+    __sthread_lock();
     Thread *threadp;
     void *memory;
 
@@ -232,7 +238,8 @@ Thread * sthread_create(void (*f)(void *arg), void *arg) {
     threadp->context = __sthread_initialize_context(
         (char *) memory + DEFAULT_STACKSIZE, f, arg);
     enqueue_thread(threadp);
-
+    /* We must unlock explicitly since we can't rely on switch to unlock. */
+    __sthread_unlock();
     return threadp;
 }
 
@@ -262,7 +269,13 @@ void __sthread_finish(void) {
     __sthread_lock();
     current->state = ThreadFinished;
     __sthread_switch();
-    __sthread_unlock(); // Henry Sun Approved, but henry also recommends 
+    /* Theoretically, we should have an unlock thread immediately following
+     * the switch after we locked, but since we also unlock inside _restore
+     * there is no need for a redundant lock. 
+     * The reason why we unlock inside restore is because the timer interrupt
+     * calls switch, and since the timer should not unlock inside itself,
+     * we should unlock from within restore after switch.
+     */
 }
 
 
@@ -273,11 +286,8 @@ void __sthread_finish(void) {
 */
 void __sthread_delete(Thread *threadp) {
     assert(threadp != NULL);
-
-    __sthread_lock();
     free(threadp->memory);
     free(threadp);
-    __sthread_unlock();
 }
 
 
@@ -291,7 +301,13 @@ void sthread_yield() {
      */
     __sthread_lock();
     __sthread_switch();
-    __sthread_unlock();
+    /* Theoretically, we should have an unlock thread immediately following
+     * the switch after we locked, but since we also unlock inside _restore
+     * there is no need for a redundant lock. 
+     * The reason why we unlock inside restore is because the timer interrupt
+     * calls switch, and since the timer should not unlock inside itself,
+     * we should unlock from within restore after switch.
+     */
 }
 
 
@@ -302,12 +318,19 @@ void sthread_yield() {
 void sthread_block() {
     /* sthread_block blocks the current thread and switches to a new 
      * thread, this process must not be interrupted by the timer. Thus
-     * we obtain a lock.
+     * we obtain a lock. Since block calls switch which calls scheduler,
+     * we should protect the scheduler from being interrupted.
      */
     __sthread_lock();
     current->state = ThreadBlocked;
     __sthread_switch();
-    __sthread_unlock();
+    /* Theoretically, we should have an unlock thread immediately following
+     * the switch after we locked, but since we also unlock inside _restore
+     * there is no need for a redundant lock. 
+     * The reason why we unlock inside restore is because the timer interrupt
+     * calls switch, and since the timer should not unlock inside itself,
+     * we should unlock from within restore after switch.
+     */
 }
 
 
@@ -316,6 +339,9 @@ void sthread_block() {
 * the ready queue.
 */
 void sthread_unblock(Thread *threadp) {
+    /* We should call lock here since we are modifying shared memory
+     * which are the queues that govern the threading process.
+     */
     __sthread_lock();
 /* Make sure the thread was blocked */
     assert(threadp->state == ThreadBlocked);
@@ -326,6 +352,7 @@ void sthread_unblock(Thread *threadp) {
 /* Re-queue it */
     threadp->state = ThreadReady;
     enqueue_thread(threadp);
+    /* We must explicitly unlock here since we did not call switch*/
     __sthread_unlock();
 }
 
