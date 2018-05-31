@@ -1,6 +1,21 @@
 only producer 0's output is used, more accurately, we say that only
 one of the two producers is being scheduled. This is because the 
-producer thread does not yield execution by itself, thus producer 0, which 
-the first thread being scheduled,
-cooperative
-multitasking fails. We do not have a mechanism for preemptive multitasking.
+producer thread does not yield execution by itself until
+the buffer is full, thus producer 0, which 
+is the first thread being scheduled, runs and cooperative multitasking fails. 
+We do not have a mechanism for preemptive multitasking.
+
+these are the steps that make it fail
+
+first producer 0 is scheduled. 
+It runs until the buffer is full, then it yields.
+Then we thread switch to producer 1, but since we have a full buffer
+we can't produce, then the producer 1 also yield without it having 
+produced anything. Then the scheduler switches to consumer who
+consumes the entire buffer until it is empty, at which point 
+it yields. then the scheduler runs producer 0 again since 
+it was the first thing that yielded, then it must be in front of the
+queue which means it gets called before producer 1, and the process
+starts all over again.
+
+

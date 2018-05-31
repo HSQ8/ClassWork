@@ -91,6 +91,10 @@ BoundedBuffer *new_bounded_buffer(int length) {
      * any data value yet.
      */ 
     bufp->resources = new_semaphore(0);
+
+    /* We use this semaphore as a mutex to prevent concurrent access
+     * to the buffer
+     */
     bufp->bound_buffer_lock = new_semaphore(1);
     return bufp;
 }

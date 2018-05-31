@@ -36,6 +36,7 @@ __sthread_lock:
         .globl __sthread_unlock
 __sthread_unlock:
         movl $0, scheduler_lock    # unlock is very simple, it simply unlocks
+                                   # by putting a 0 into scheduler_lock
         ret
 
 #============================================================================

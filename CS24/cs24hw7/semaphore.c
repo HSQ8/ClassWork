@@ -18,9 +18,12 @@
 
 /*
  * The semaphore data structure contains a semaphore variable
+ * The semaphore allows us to keep track of available resources
+ * that we can give out to threads.
  */
 struct _semaphore {
     int i;
+    
     /* Semaphore holds a pointer to a queue to keep track of blocked threads 
      * We add this structure to the semaphore so that we can fairly
      * unblock threads in the same order they are blocked. By using a 
@@ -65,21 +68,32 @@ void semaphore_wait(Semaphore *semp) {
     assert(semp != NULL);
     /* If we don't have resource, we lock then block and update queue*/
     /* Here we lock the thread since this function isn't reentrant, we 
-     * modifying some very important program states here.
+     * modifying some very important shared program states here.
      */
     __sthread_lock();
+
+    /* The error in concurrency in the pesudocode in the assignment is that
+     * it uses an if loop. The problem with that after the function becomes
+     * unblocked, it may immediately get interrupted, which would mean that 
+     * another function would resume and take the semaphore resource, and 
+     * then we we unblock our original function, we would have already
+     * decremented the semaphore and we would decrement again, which would
+     * then cause us to take too many resources. Thus we must use
+     * the while loop to check the conditions of the semaphore again.
+     */
     while (semp->i == 0) {
         /* Here we first lock the thread so that we cannot get 
          * interrupted by the timer interrupt.
          */
         /* We add the thread to the semaphore's queue to keep track of it*/
         queue_append(semp->queue, sthread_current());
-        /* block the thread so we don't waste cpu power 
+        /* block the thread so we don't waste cpu power on busy wait.
          * We block after append because block switches, so if block
          * happened before append, then we wouldn't properly update the 
          * queue in the semaphore
          */
         sthread_block();
+        /* We lock here because block unlocks at the end. */
         __sthread_lock();
     }
     /* Once we reach here, it must be such that we unblocked meaning
@@ -98,15 +112,16 @@ void semaphore_signal(Semaphore *semp) {
     /* Since we are potentially unblocking threads,
      * and since we are modifying the semaphore,
      * we don't want any states to potentially become corrupt since
-     * this function isn't reentrant (we are modifying some very important
+     * this function isn't reentrant (we are modifying some shared
      * program states here), and thus we lock before we do any
      * modifications.
      */
     __sthread_lock();
     semp->i++;
     if (!queue_empty(semp->queue)) {
-        /* If we have any threads available to unblock, we unlock it because
-         * we now have resources
+        /* If we have any threads available to unblock, we unblock it because
+         * we now have resources that can give to threads. This will
+         * allow threads to resume.
          */
         Thread *blocked_thread = queue_take(semp->queue);
         sthread_unblock(blocked_thread);
