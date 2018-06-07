@@ -5,7 +5,7 @@ VMEM_OBJS = virtualmem.o vmalloc.o matrix.o test_matrix.o queue.o
 
 # So that the binary programs can be listed in fewer places.
 # You will want to add to this variable as you implement various policies.
-BINARIES = test_matrix test_matrix_fifo test_matrix_clru
+BINARIES = test_matrix test_matrix_fifo test_matrix_clru test_matrix_aging
 
 
 all: $(BINARIES)
@@ -23,6 +23,8 @@ test_matrix_fifo:  $(VMEM_OBJS) vmpolicy_fifo.o
 test_matrix_clru:  $(VMEM_OBJS) vmpolicy_clru.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
+test_matrix_aging:  $(VMEM_OBJS) vmpolicy_aging.o
+	$(CC) $(CPPFLAGS) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
 	rm -f *.o *~ $(BINARIES)

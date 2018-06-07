@@ -2,7 +2,6 @@
 #define QUEUE_H
 #include "virtualmem.h"
 
-#define BITLENGTH 16
 /* timebit must be unsigned int*/
 typedef uint16_t TIMEBIT;
 

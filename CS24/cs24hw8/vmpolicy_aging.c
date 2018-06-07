@@ -14,6 +14,7 @@
 
 #include "queue.h"
 #include "vmpolicy.h"
+#define NULL_AGE -1
 
 
 /*============================================================================
@@ -32,7 +33,7 @@ static Queue loaded;
 
 /* Initialize the policy.  Return nonzero for success, 0 for failure. */
 int policy_init(int max_resident) {
-    fprintf(stderr, "Using CLRU eviction policy.\n\n");
+    fprintf(stderr, "Using Aging eviction policy.\n\n");
     /* There's nothing to initialize really. */
     /* Return nonzero if initialization succeeded. */
     return 1;
@@ -57,13 +58,16 @@ void policy_page_mapped(page_t page) {
 
 /* This function is called when the virtual memory system has a timer tick. */
 void policy_timer_tick(void) {
-    TIMEBIT bit_mask = (1 << BITLENGTH) - 1
+    TIMEBIT bit_mask = (TIMEBIT)(1 << sizeof(TIMEBIT) * 8);
     QueueNode* head = loaded.head;
-    page_t temppage = NULL_PAGE;
     while(head != NULL) {
-        head->age >> 1;
-        head->age -= 1;
-        temppage = head->page;
+        head->age >>= 1;
+        if (is_page_accessed(head->page)) {
+            head->age |= bit_mask;
+            clear_page_accessed(head->age);
+            set_page_permission(head->age, PAGEPERM_NONE);
+        }
+        head = head->next;
     }
 }
 
@@ -73,7 +77,16 @@ void policy_timer_tick(void) {
  * page-replacement policy.
  */
 page_t choose_and_evict_victim_page(void) {
-    page_t victim = queue_take(&loaded);
+    page_t victim = NULL_PAGE;
+    QueueNode* head = loaded.head;
+    TIMEBIT current_age = head->age;
+
+    while(head != NULL) {
+        if (head->age < current_age) {
+            current_age = head->age;
+        }
+        victim = head->page;
+    }
     /* Handle the case where we attempt to evict with no pages loaded
      * shouldn't happen logically.
      */
