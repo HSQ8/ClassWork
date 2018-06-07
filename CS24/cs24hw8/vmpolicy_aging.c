@@ -84,8 +84,9 @@ page_t choose_and_evict_victim_page(void) {
     while(head != NULL) {
         if (head->age < current_age) {
             current_age = head->age;
+            victim = head->page;
         }
-        victim = head->page;
+        head = head->next;
     }
     /* Handle the case where we attempt to evict with no pages loaded
      * shouldn't happen logically.
