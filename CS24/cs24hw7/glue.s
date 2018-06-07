@@ -26,7 +26,7 @@ __sthread_lock:
         xchg scheduler_lock, %eax  # perform a lock exchange so we get 
                                    # value of scheduler_lock into eax 
                                    # atomically
-        xor $1, % eax              # xor with 1 will return the opposite
+        xor  $1, %eax              # xor with 1 will return the opposite
         ret                        # return
 
 #============================================================================
