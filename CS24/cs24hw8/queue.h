@@ -3,7 +3,7 @@
 #include "virtualmem.h"
 
 /* timebit must be unsigned int*/
-typedef uint16_t TIMEBIT;
+typedef uint8_t TIMEBIT;
 
 /*! A single node of a queue of threads. */  
 typedef struct _queuenode {

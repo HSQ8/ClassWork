@@ -34,8 +34,6 @@ static Queue loaded;
 /* Initialize the policy.  Return nonzero for success, 0 for failure. */
 int policy_init(int max_resident) {
     fprintf(stderr, "Using Aging eviction policy.\n\n");
-    /* There's nothing to initialize really. */
-    /* Return nonzero if initialization succeeded. */
     return 1;
 }
 
@@ -58,25 +56,22 @@ void policy_page_mapped(page_t page) {
 
 /* This function is called when the virtual memory system has a timer tick. */
 void policy_timer_tick(void) {
-    TIMEBIT bit_mask = (TIMEBIT)(1 << sizeof(TIMEBIT) * 8);
+    TIMEBIT bit_mask = (TIMEBIT)(1 << (sizeof(TIMEBIT) * 8 - 1));
     QueueNode* head = loaded.head;
     while(head != NULL) {
+        page_t currentpage = head->page;
         head->age >>= 1;
-        if (is_page_accessed(head->page)) {
+        if (is_page_accessed(currentpage)) {
+            clear_page_accessed(currentpage);
             head->age |= bit_mask;
-            clear_page_accessed(head->age);
-            set_page_permission(head->age, PAGEPERM_NONE);
+            set_page_permission(currentpage, PAGEPERM_NONE);
         }
         head = head->next;
     }
 }
 
 
-/* Choose a page to evict from the collection of mapped pages.  Then, record
- * that it is evicted.  This is very simple since we are implementing a random
- * page-replacement policy.
- */
-page_t choose_and_evict_victim_page(void) {
+page_t findyoungest(Queue loaded) {
     page_t victim = NULL_PAGE;
     QueueNode* head = loaded.head;
     TIMEBIT current_age = head->age;
@@ -88,6 +83,16 @@ page_t choose_and_evict_victim_page(void) {
         }
         head = head->next;
     }
+    return victim;
+}
+
+
+/* Choose a page to evict from the collection of mapped pages.  Then, record
+ * that it is evicted.  This is very simple since we are implementing a random
+ * page-replacement policy.
+ */
+page_t choose_and_evict_victim_page(void) {
+    page_t victim = findyoungest(loaded);
     /* Handle the case where we attempt to evict with no pages loaded
      * shouldn't happen logically.
      */
@@ -95,6 +100,7 @@ page_t choose_and_evict_victim_page(void) {
         printf("%s\n", "Attempt evict with no pages loaded, system will abort");
         abort();
     }
+    queue_remove(&loaded, victim);
     return victim;
 }
 
