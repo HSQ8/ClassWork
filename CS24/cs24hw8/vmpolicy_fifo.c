@@ -1,5 +1,5 @@
 /*============================================================================
- * Implementation of the RANDOM page replacement policy.
+ * Implementation of the FIFO page replacement policy.
  *
  * We don't mind if paging policies use malloc() and free(), just because it
  * keeps things simpler.  In real life, the pager would use the kernel memory
@@ -51,6 +51,7 @@ void policy_cleanup(void) {
  * virtual address space.  Record that the page is now resident.
  */
 void policy_page_mapped(page_t page) {
+    /* Add the page to our queue. */
     queue_append(&loaded, page);
 }
 
@@ -66,6 +67,7 @@ void policy_timer_tick(void) {
  * page-replacement policy.
  */
 page_t choose_and_evict_victim_page(void) {
+    /* Take the front of the queue. */
     page_t victim = queue_take(&loaded);
     /* Handle the case where we attempt to evict with no pages loaded
      * shouldn't happen logically.

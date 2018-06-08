@@ -149,11 +149,11 @@ unsigned int get_num_loads() {
  */
 const char *signal_code(int code) {
     switch (code) {
-    case SEGV_MAPERR:
+        case SEGV_MAPERR:
         return "SEGV_MAPERR";
-    case SEGV_ACCERR:
+        case SEGV_ACCERR:
         return "SEGV_ACCERR";
-    default:
+        default:
         return "UNKNOWN";
     }
 }
@@ -254,7 +254,7 @@ int get_page_permission(page_t page) {
 void set_page_permission(page_t page, int perm) {
     assert(page < NUM_PAGES);
     assert(perm == PAGEPERM_NONE || perm == PAGEPERM_READ ||
-           perm == PAGEPERM_RDWR);
+       perm == PAGEPERM_RDWR);
 
     /* Call mprotect() to set the memory region's protections. */
     if (mprotect(page_to_addr(page), PAGE_SIZE, pageperm_to_mmap(perm)) == -1) {
@@ -272,19 +272,19 @@ void set_page_permission(page_t page, int perm) {
  */
 int pageperm_to_mmap(int perm) {
     assert(perm == PAGEPERM_NONE || perm == PAGEPERM_READ ||
-           perm == PAGEPERM_RDWR);
+       perm == PAGEPERM_RDWR);
 
     switch (perm) {
-    case PAGEPERM_NONE:
+        case PAGEPERM_NONE:
         return PROT_NONE;
 
-    case PAGEPERM_READ:
+        case PAGEPERM_READ:
         return PROT_READ;
 
-    case PAGEPERM_RDWR:
+        case PAGEPERM_RDWR:
         return PROT_READ | PROT_WRITE;
 
-    default:
+        default:
         fprintf(stderr, "pageperm_to_mmap: unrecognized value %u\n", perm);
         abort();
     }
@@ -341,8 +341,8 @@ void * vmem_init(unsigned _max_resident) {
     num_faults = 0;
 
     fprintf(stderr, "\"Physical memory\" is in the range %p..%p\n * %d pages"
-            " total, %d maximum resident pages\n\n", vmem_start, vmem_end,
-            NUM_PAGES, max_resident);
+        " total, %d maximum resident pages\n\n", vmem_start, vmem_end,
+        NUM_PAGES, max_resident);
 
     /* Clear the entire page table. */
     memset(page_table, 0, sizeof(page_table));
@@ -430,19 +430,19 @@ void vmem_cleanup(void) {
 void map_page(page_t page, unsigned initial_perm) {
     assert(page < NUM_PAGES);
     assert(initial_perm == PAGEPERM_NONE || initial_perm == PAGEPERM_READ ||
-           initial_perm == PAGEPERM_RDWR);
+       initial_perm == PAGEPERM_RDWR);
     assert(!is_page_resident(page));  /* Shouldn't already be mapped */
 
 #if VERBOSE
     fprintf(stderr, "Mapping in page %u.  Resident (before mapping) = %u, "
-           "max resident = %u.\n", page, num_resident, max_resident);
+       "max resident = %u.\n", page, num_resident, max_resident);
 #endif
 
     /* Make sure we don't exceed the physical memory constraint. */
     num_resident++;
     if (num_resident > max_resident) {
         fprintf(stderr, "map_page: exceeded physical memory, resident pages "
-                "= %u, max resident = %u\n", num_resident, max_resident);
+            "= %u, max resident = %u\n", num_resident, max_resident);
         abort();
     }
 
@@ -473,16 +473,28 @@ void map_page(page_t page, unsigned initial_perm) {
      */
 
     unsigned int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_FIXED;
+    /* We map the new address space into what our virtual function can use. */
     void * newmem = mmap(page_to_addr(page), PAGE_SIZE, 
         pageperm_to_mmap(PAGEPERM_RDWR), flags, fd_swapfile, page * PAGE_SIZE);
+    /* Check if we fail in anyway. */
     if (newmem == NULL || newmem != page_to_addr(page)) {
-        /* catch errors here */
+        printf("%s\n", "mmap failed");
+        abort();    
     }
-    if (lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET) == -1) {
-        /*Handle lseek fail*/
+    /* Seek the pointer into our buffer. */
+    off_t lseek_ret = lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET);
+    /* Check if we fail in anyway. */
+    if (lseek_ret == -1 || lseek_ret != page * PAGE_SIZE) {
+        printf("%s\n", "lseek failed");
+        abort();
     }
-    if (read(fd_swapfile, newmem, PAGE_SIZE) == -1) {
-        /*Handle read failure*/
+    /* Read from swap and copy into our new memory. */
+    size_t read_ret = read(fd_swapfile, newmem, PAGE_SIZE);
+
+    /* Check if we fail in anyway. */
+    if (read_ret == -1 || read_ret != PAGE_SIZE) {
+        printf("%s\n", "read failed");
+        abort();
     }
     set_page_permission(page, initial_perm);
     set_page_resident(page);
@@ -534,17 +546,26 @@ void unmap_page(page_t page) {
      *
      * Finally, the page's Page Table Entry should be cleared.
      */
+    
+    /* Set permissions so we can read and write as needed. */
     set_page_permission(page, PAGEPERM_RDWR);
     
+    /* If file has been modified, we must write back into swap. */
     if (is_page_dirty(page)) {
         /* Must save page back into swap file */
-        if (lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET) == -1) {
-            /*Handle lseek fail*/
-            printf("%s\n", "lseek in unmap failed");
+        /* Seek the pointer into our buffer. */
+        off_t lseek_ret = lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET);
+        /* Check if we fail in anyway. */
+        if (lseek_ret == -1 || lseek_ret != page * PAGE_SIZE) {
+            printf("%s\n", "lseek failed");
+            abort();
         }
-        if (write(fd_swapfile, page_to_addr(page), PAGE_SIZE) == -1) {
-            /* Handle write errors*/
+
+        ssize_t write_ret = write(fd_swapfile, page_to_addr(page), PAGE_SIZE);
+        if ( write_ret== -1 || write_ret != PAGE_SIZE) {
+            /* Handle write errors. */
             printf("%s\n", "write in unmap failed");
+            abort();
         }
 
     }
@@ -590,7 +611,7 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
     fprintf(stderr,
         "================================================================\n");
     fprintf(stderr, "SIGSEGV:  Address %p, Page %u, Code %s (%d)\n",
-           addr, page, signal_code(infop->si_code), infop->si_code);
+       addr, page, signal_code(infop->si_code), infop->si_code);
 #endif
 
     /* We really can't handle any other type of code.  On Linux this should be
@@ -601,46 +622,6 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
     /* Map the page into memory so that the fault can be resolved.  Of course,
      * this may result in some other page being unmapped.
      */
-    
-    switch (infop->si_code) {
-        case SEGV_MAPERR: {
-            /* In the case we run out of space, we evict something 
-             * and make space for the now page.
-             */
-            assert(num_resident <= max_resident);
-            if (num_resident == max_resident) {
-                page_t victim = choose_and_evict_victim_page();
-                assert(is_page_resident(victim));
-                unmap_page(victim);
-                assert(!is_page_resident(victim));
-            }
-            map_page(page, PAGEPERM_NONE);
-            break;
-        }
-        case SEGV_ACCERR: {
-            int ACCESS = get_page_permission(page);
-            switch (ACCESS) {
-                case PAGEPERM_NONE: {
-                    set_page_permission(page, PAGEPERM_READ);
-                    set_page_accessed(page);
-                    break;
-                }
-                case PAGEPERM_READ: {
-                    set_page_permission(page, PAGEPERM_RDWR);
-                    set_page_dirty(page);
-                    break;
-                }
-                default: {
-                    printf("%s\n", "should never reach here. ");
-                }
-            }
-
-            break;
-        }
-        default: {
-                    printf("%s\n", "should never reach here. ");
-        }
-    }
 
     /* ========= IMPLEMENT =================================================
      *
@@ -676,6 +657,56 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
      * and then call abort() so that your code will fail visibly.  This will
      * greatly aid in debugging.
      */
+    
+
+    /* Here we switch the code to handle different cases. */
+    switch (infop->si_code) {
+        /* handle map errors. */
+        case SEGV_MAPERR: {
+            /* In the case we run out of space, we evict something 
+             * and make space for the now page.
+             */
+            assert(num_resident <= max_resident);
+            if (num_resident == max_resident) {
+                page_t victim = choose_and_evict_victim_page();
+                assert(is_page_resident(victim));
+                unmap_page(victim);
+                assert(!is_page_resident(victim));
+            }
+            map_page(page, PAGEPERM_NONE);
+            break;
+        }
+        /* Handle Access errors by updating permissions. */
+        case SEGV_ACCERR: {
+            /* Get the access code of the page that threw the error*/
+            int ACCESS = get_page_permission(page);
+            switch (ACCESS) {
+                /* if we have no error, then we elevate to read. */
+                case PAGEPERM_NONE: {
+                    set_page_permission(page, PAGEPERM_READ);
+                    set_page_accessed(page);
+                    break;
+                }
+                /* If we still fail, then it must be that we need write
+                 * So we elevate to read and write.
+                 */
+                case PAGEPERM_READ: {
+                    set_page_permission(page, PAGEPERM_RDWR);
+                    set_page_dirty(page);
+                    break;
+                }
+                /* Unreachable case. */
+                default: {
+                    printf("%s\n", "should never reach here. ");
+                }
+            }
+            break;
+        }
+        default: {
+            printf("%s\n", "should never reach here. ");
+        }
+    }
+
 }
 
 

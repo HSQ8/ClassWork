@@ -2,12 +2,21 @@
 #define QUEUE_H
 #include "virtualmem.h"
 
-/* timebit must be unsigned int*/
-typedef uint8_t TIMEBIT;
+/* timebit must be unsigned int
+ * The way you change the number of bits you use in your time is to
+ * simply change the type used here in the typedef. For instance,
+ * a 16 bit time would use a unsigned 16 bit int, where as 32 bit 
+ * would use uint_32_t etc. All types must be unsigned.
+ */
 
-/*! A single node of a queue of threads. */  
+typedef uint16_t TIMEBIT;
+
+
+/*! A single node of a queue of pages. */  
 typedef struct _queuenode {
+    /* The page itself*/
     page_t page;
+    /* The age of the page, used in the aging evict method. */
     TIMEBIT age;
     struct _queuenode *prev;
     struct _queuenode *next;
@@ -15,12 +24,12 @@ typedef struct _queuenode {
 
 
 /*!
- * A queue of threads.  This type is used to keep track of threads in
- * various states within the user-space threaading library.
+ * A queue of pages.  This type is used to keep track of pages in our 
+ * evict functions.
  */
 typedef struct _queue {
-    QueueNode *head;  /*!< The first thread in the queue. */
-    QueueNode *tail;  /*!< The last thread in the queue. */
+    QueueNode *head;  /*!< The first page in the queue. */
+    QueueNode *tail;  /*!< The last page in the queue. */
 } Queue;
 
 

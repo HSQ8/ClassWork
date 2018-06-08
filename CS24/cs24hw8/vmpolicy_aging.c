@@ -62,9 +62,9 @@ void policy_timer_tick(void) {
         page_t currentpage = head->page;
         head->age >>= 1;
         if (is_page_accessed(currentpage)) {
-            clear_page_accessed(currentpage);
             head->age |= bit_mask;
             set_page_permission(currentpage, PAGEPERM_NONE);
+            clear_page_accessed(currentpage);
         }
         head = head->next;
     }
@@ -72,8 +72,8 @@ void policy_timer_tick(void) {
 
 
 page_t findyoungest(Queue loaded) {
-    page_t victim = NULL_PAGE;
     QueueNode* head = loaded.head;
+    page_t victim = head->page;
     TIMEBIT current_age = head->age;
 
     while(head != NULL) {

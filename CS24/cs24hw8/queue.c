@@ -46,7 +46,7 @@ void queue_append(Queue *queuep, page_t page) {
 
 
 /*!
- * Get the first thread from the queue.  Returns NULL if the queue is empty.
+ * Get the first page from the queue.  Returns NULL if the queue is empty.
  */
 page_t queue_take(Queue *queuep) {
     QueueNode *nodep;
@@ -77,9 +77,9 @@ page_t queue_take(Queue *queuep) {
 
 
 /*!
- * Remove a thread from a queue.
+ * Remove a page from a queue.
  *
- * Returns 1 if the thread was found in the queue, or 0 if the thread was not
+ * Returns 1 if the page was found in the queue, or 0 if the page was not
  * found in the queue.
  *
  * NOTE:  DO NOT use this operation in an assertion, e.g.
@@ -93,7 +93,7 @@ int queue_remove(Queue *queuep, page_t page) {
     assert(queuep != NULL);
     assert(page != NULL_PAGE);
 
-    /* Find the node in the queue with the specified thread. */
+    /* Find the node in the queue with the specified page. */
     nodep = queuep->head;
     while (nodep != NULL && nodep->page != page)
         nodep = nodep->next;

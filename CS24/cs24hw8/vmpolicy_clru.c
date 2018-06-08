@@ -1,5 +1,5 @@
 /*============================================================================
- * Implementation of the RANDOM page replacement policy.
+ * Implementation of the CLRU page replacement policy.
  *
  * We don't mind if paging policies use malloc() and free(), just because it
  * keeps things simpler.  In real life, the pager would use the kernel memory
@@ -42,6 +42,7 @@ int policy_init(int max_resident) {
 
 /* Clean up the data used by the page replacement policy. */
 void policy_cleanup(void) {
+    /* Clear out our queue. */
     while (! queue_empty(&loaded)) {
         queue_take(&loaded);
     }
@@ -52,22 +53,33 @@ void policy_cleanup(void) {
  * virtual address space.  Record that the page is now resident.
  */
 void policy_page_mapped(page_t page) {
+    /* Add the page to the queue. */
     queue_append(&loaded, page);
 }
 
 
 /* This function is called when the virtual memory system has a timer tick. */
+
+/**
+ * Every time the clock ticks, we must move pages to the back of the 
+ * queue according to whether their access bit was set or not,
+ * then we update their access bit so we may detect their accession again 
+ * in the next interval.
+ */
 void policy_timer_tick(void) {
     QueueNode* head = loaded.head;
     page_t temppage = NULL_PAGE;
+    /* iterate through all pages. */
     while(head != NULL) {
         temppage = head->page;
         head = head->next;
+        /* If page is accessed, we move it to the back of the queue. */
         if (is_page_accessed(temppage)) {
             if (queue_remove(&loaded, temppage) == 0) {
                 printf("%s\n", "failed to remove from empty queue");
                 abort();
             }
+            /* Update flags accordingly. */
             clear_page_accessed(temppage);
             queue_append(&loaded, temppage);
             set_page_permission(temppage, PAGEPERM_NONE);
@@ -81,6 +93,7 @@ void policy_timer_tick(void) {
  * page-replacement policy.
  */
 page_t choose_and_evict_victim_page(void) {
+    /* Evict the first thing in the queue. */
     page_t victim = queue_take(&loaded);
     /* Handle the case where we attempt to evict with no pages loaded
      * shouldn't happen logically.
@@ -89,6 +102,7 @@ page_t choose_and_evict_victim_page(void) {
         printf("%s\n", "Attempt evict with no pages loaded, system will abort");
         abort();
     }
+    printf("%d\n", victim);
     return victim;
 }
 
