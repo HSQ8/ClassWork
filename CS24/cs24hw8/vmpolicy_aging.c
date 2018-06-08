@@ -56,7 +56,7 @@ void policy_page_mapped(page_t page) {
 
 /* This function is called when the virtual memory system has a timer tick. */
 void policy_timer_tick(void) {
-    TIMEBIT bit_mask = (TIMEBIT)(1 << (sizeof(TIMEBIT) * 8 - 1));
+    TIMEBIT bit_mask = (TIMEBIT)(1 << ((sizeof(TIMEBIT) * 8 - 1)));
     QueueNode* head = loaded.head;
     while(head != NULL) {
         page_t currentpage = head->page;
@@ -70,7 +70,11 @@ void policy_timer_tick(void) {
     }
 }
 
-
+/**
+ * Helper function that finds the youngest page based on age.
+ * @param  loaded the loaded queue
+ * @return        page_t, which is the page number of youngest page.
+ */
 page_t findyoungest(Queue loaded) {
     QueueNode* head = loaded.head;
     page_t victim = head->page;
