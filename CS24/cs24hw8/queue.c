@@ -28,6 +28,7 @@ void queue_append(Queue *queuep, page_t page) {
     }
 
     nodep->page = page;
+    /* Whenever we add a page, its age should be initialized to 0. */
     nodep->age = 0;
 
     if(queuep->head == NULL) {

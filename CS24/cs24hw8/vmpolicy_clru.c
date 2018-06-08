@@ -21,8 +21,11 @@
  * "Loaded Pages" Queue Data Structure
  *
  * This data structure records all pages that are currently loaded in the
- * virtual memory, so that we can choose a random page to evict very easily.
+ * virtual memory, so that we can choose the first page (after processing) 
+ * to evict very easily.
  * This data structure is defined in queue.h
+ *
+ * This is also reused from assignment 7.
  */
 static Queue loaded;
 
@@ -79,8 +82,14 @@ void policy_timer_tick(void) {
                 printf("%s\n", "failed to remove from empty queue");
                 abort();
             }
-            /* Update flags accordingly. */
+            /* Here we set the permission to NONE and clear 
+             * flag accessed in order to
+             * trigger another SEGV_ACCERR error. This is the only
+             * way we'll know if the page was accessed again between
+             * timer ticks.
+             */
             clear_page_accessed(temppage);
+            /* Add to back of queue. */
             queue_append(&loaded, temppage);
             set_page_permission(temppage, PAGEPERM_NONE);
         }
@@ -89,7 +98,7 @@ void policy_timer_tick(void) {
 
 
 /* Choose a page to evict from the collection of mapped pages.  Then, record
- * that it is evicted.  This is very simple since we are implementing a random
+ * that it is evicted.  This is very simple since we are implementing a CLRU
  * page-replacement policy.
  */
 page_t choose_and_evict_victim_page(void) {

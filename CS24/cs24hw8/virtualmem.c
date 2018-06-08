@@ -472,8 +472,9 @@ void map_page(page_t page, unsigned initial_perm) {
      * fail.)
      */
 
+    /* Here we create the flag. */
     unsigned int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_FIXED;
-    /* We map the new address space into what our virtual function can use. */
+    /* We map the new address space into what our function can use. */
     void * newmem = mmap(page_to_addr(page), PAGE_SIZE, 
         pageperm_to_mmap(PAGEPERM_RDWR), flags, fd_swapfile, page * PAGE_SIZE);
     /* Check if we fail in anyway. */
@@ -481,10 +482,14 @@ void map_page(page_t page, unsigned initial_perm) {
         printf("%s\n", "mmap failed");
         abort();    
     }
-    /* Seek the pointer into our buffer. */
+    /* Seek the pointer into our swap buffer. */
     off_t lseek_ret = lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET);
     /* Check if we fail in anyway. */
     if (lseek_ret == -1 || lseek_ret != page * PAGE_SIZE) {
+        /* if lseek fails we would catch it since it returns -1
+         * if it fails in a different way, we would catch it since
+         * it is not seeking to the correct place
+         */
         printf("%s\n", "lseek failed");
         abort();
     }
@@ -493,10 +498,16 @@ void map_page(page_t page, unsigned initial_perm) {
 
     /* Check if we fail in anyway. */
     if (read_ret == -1 || read_ret != PAGE_SIZE) {
+        /* If read fails we would catch the -1. 
+         * we would also catch errors when write doesn't read
+         * the correct amount.
+         */
         printf("%s\n", "read failed");
         abort();
     }
+    /* Set the page's permission to the initial permissions given to us.*/
     set_page_permission(page, initial_perm);
+    /* Mark page as resident. */
     set_page_resident(page);
 
 
@@ -557,19 +568,28 @@ void unmap_page(page_t page) {
         off_t lseek_ret = lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET);
         /* Check if we fail in anyway. */
         if (lseek_ret == -1 || lseek_ret != page * PAGE_SIZE) {
+        /* if lseek fails we would catch it since it returns -1
+         * if it fails in a different way, we would catch it since
+         * it is not seeking to the correct place
+         */
             printf("%s\n", "lseek failed");
             abort();
         }
 
         ssize_t write_ret = write(fd_swapfile, page_to_addr(page), PAGE_SIZE);
+        /* Handle write errors. */
         if ( write_ret== -1 || write_ret != PAGE_SIZE) {
-            /* Handle write errors. */
+            /* If we fail to write with -1, we catch here.
+             * If we fail to write correct length, we also catch here.
+             */
             printf("%s\n", "write in unmap failed");
             abort();
         }
 
     }
+    /* Calls linux function to unmap. */
     munmap(page_to_addr(page), PAGE_SIZE);
+    /* Clear page */
     clear_page_entry(page);
     assert(!is_page_resident(page));
     num_resident--;
@@ -668,6 +688,9 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
              */
             assert(num_resident <= max_resident);
             if (num_resident == max_resident) {
+                /* In different implementations, the choose and evict
+                 * function will use different policies to evict pages
+                 */
                 page_t victim = choose_and_evict_victim_page();
                 assert(is_page_resident(victim));
                 unmap_page(victim);
@@ -681,9 +704,12 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
             /* Get the access code of the page that threw the error*/
             int ACCESS = get_page_permission(page);
             switch (ACCESS) {
-                /* if we have no error, then we elevate to read. */
+                /* if we have no access, then we elevate to read. */
                 case PAGEPERM_NONE: {
                     set_page_permission(page, PAGEPERM_READ);
+                    /* Since we intend to read, we must set
+                     * page to accessed.
+                     */
                     set_page_accessed(page);
                     break;
                 }
@@ -692,19 +718,26 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
                  */
                 case PAGEPERM_READ: {
                     set_page_permission(page, PAGEPERM_RDWR);
-                    set_page_accessed(page);
+                    /* Since we intended to write and now has given
+                     * write permission, we know that the page 
+                     * must be dirty from being written.
+                     */
                     set_page_dirty(page);
                     break;
                 }
                 /* Unreachable case. */
                 default: {
+                    /* Something went wrong. */
                     printf("%s\n", "should never reach here. ");
+                    abort();
                 }
             }
             break;
         }
         default: {
+            /* Something went wrong. */
             printf("%s\n", "should never reach here. ");
+            abort();
         }
     }
 

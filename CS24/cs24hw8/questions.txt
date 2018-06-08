@@ -7,16 +7,19 @@ a)  How to detect when a page is accessed?
     on the current permission (i.e. NONE -> READ, READ -> RDWR, since
     we assume that the current permission must not be enough). Afterwards
     we will update the page access bit flag which will now tell us that it 
-    has been accessed.
+    has been accessed. From this point on, we will know if a page has been
+    accessed or not.
 
 b)  How to detect when a page becomes dirty?
     when we get a segfault with code SEGV_ACCERR, then we 
     read the state of the page and we see that it has permission of read,
     implying that we need more than just read, we need write, which means
-    once we grant write privileges, the page will become dirty.
+    once we grant write privileges, the page will become dirty since we 
+    will proceed to write.
 
 f)  Page-load rate of "test_matrix -m 1024 1000" using RANDOM policy:
-    ./test_matrix -m 1024 1000
+    
+    >>>./test_matrix -m 1024 1000
     
 
     Total page loads:  52695
@@ -39,6 +42,10 @@ If you have any additional information to share about your policy, please
 share it here.  Please keep your comments brief; you don't need to repeat
 what the assignment says about the policy here.
 
+For the FIFO policy, I used a queue that was the queue given in homework 7.
+I modified the queue slightly in order to accommodate the fact that we are
+storing page_t instead of thread.
+
 
 h)  Page Replacement Policy #2 (if you implemented two policies)
 
@@ -57,6 +64,8 @@ Give the resulting page-load rate of the above command:
 If you have any additional information to share about your policy, please
 share it here.  Please keep your comments brief; you don't need to repeat
 what the assignment says about the policy here.
+
+For this policy I also used the same queue from the FIFO policy.
 
 i) Page Replacement Policy #2 (if you implemented two policies)
 
@@ -78,8 +87,8 @@ what the assignment says about the policy here.
 
 I designed this policy to be flexible such that we can use different number
 of bits to memorize the age of each page. The way this is accomplished is 
-that the type we use in our queuenode for keeping track of time is a custom
-defined typedef called TIMEBIT, which is typed defed in queue.h. This 
+that the type we use in our queuenode for keeping track of age is a custom
+defined typedef called TIMEBIT, which is typedef-ed in queue.h. This 
 MACRO allows TIMEBIT to be either uint32_t, uint16_t, etc. At compile time,
 we then compute how many bits our mask needs to be by using sizeof().*(note
 all types must be unsigned) 
@@ -100,6 +109,15 @@ Total page loads:  10087
 8 bit run
 
 Total page loads:  6825
+
+Lastly, we also use a queue (plus modification to queuenode to store a timebit)
+to store all the pages, even though this isn't
+the most stylistically beautiful way to do it, I talked with a TA and he 
+said it was fine if I used it this way since the alternate way was to
+implement another structure with repeated code. In a real world 
+scenario we would have access to a generic queue which we can simply
+use a different queuenode type, and since this is not the focus of the
+assignment it is stylistically fine.
 
 
 

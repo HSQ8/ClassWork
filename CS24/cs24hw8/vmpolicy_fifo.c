@@ -20,8 +20,10 @@
  * "Loaded Pages" Queue Data Structure
  *
  * This data structure records all pages that are currently loaded in the
- * virtual memory, so that we can choose a random page to evict very easily.
+ * virtual memory, so that we can choose the first page to evict very easily.
  * This data structure is defined in queue.h
+ *
+ * Reused from assignment 7.
  */
 static Queue loaded;
 
@@ -41,6 +43,9 @@ int policy_init(int max_resident) {
 
 /* Clean up the data used by the page replacement policy. */
 void policy_cleanup(void) {
+    /* Since queue take handles freeing pointers, we just need to
+     * keep taking from queue until it is empty. 
+     */
     while (! queue_empty(&loaded)) {
         queue_take(&loaded);
     }
@@ -63,7 +68,7 @@ void policy_timer_tick(void) {
 
 
 /* Choose a page to evict from the collection of mapped pages.  Then, record
- * that it is evicted.  This is very simple since we are implementing a random
+ * that it is evicted.  This is very simple since we are implementing a FIFO
  * page-replacement policy.
  */
 page_t choose_and_evict_victim_page(void) {
