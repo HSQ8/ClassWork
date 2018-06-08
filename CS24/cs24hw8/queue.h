@@ -9,7 +9,7 @@
  * would use uint_32_t etc. All types must be unsigned.
  */
 
-typedef uint16_t TIMEBIT;
+typedef uint8_t TIMEBIT;
 
 
 /*! A single node of a queue of pages. */  
