@@ -4,7 +4,10 @@ Answers to HW8 Questions
 a)  How to detect when a page is accessed?
     when we get a seg fault with code SEGV_ACCERR. Once we get this error,
     the segfault handler will elevate the permission on that page based
-    on the current permission.
+    on the current permission (i.e. NONE -> READ, READ -> RDWR, since
+    we assume that the current permission must not be enough). Afterwards
+    we will update the page access bit flag which will now tell us that it 
+    has been accessed.
 
 b)  How to detect when a page becomes dirty?
     when we get a segfault with code SEGV_ACCERR, then we 

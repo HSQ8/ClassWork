@@ -102,7 +102,6 @@ page_t choose_and_evict_victim_page(void) {
         printf("%s\n", "Attempt evict with no pages loaded, system will abort");
         abort();
     }
-    printf("%d\n", victim);
     return victim;
 }
 
