@@ -692,6 +692,7 @@ static void sigsegv_handler(int signum, siginfo_t *infop, void *data) {
                  */
                 case PAGEPERM_READ: {
                     set_page_permission(page, PAGEPERM_RDWR);
+                    set_page_accessed(page);
                     set_page_dirty(page);
                     break;
                 }
