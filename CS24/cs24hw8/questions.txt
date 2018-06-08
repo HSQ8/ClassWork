@@ -4,18 +4,19 @@ Answers to HW8 Questions
 a)  How to detect when a page is accessed?
     when we get a seg fault with code SEGV_ACCERR. Once we get this error,
     the segfault handler will elevate the permission on that page based
-    on the current permission (i.e. NONE -> READ, READ -> RDWR, since
+    on the current permission (i.e. NONE -> READ, since
     we assume that the current permission must not be enough). Afterwards
     we will update the page access bit flag which will now tell us that it 
     has been accessed. From this point on, we will know if a page has been
     accessed or not.
 
 b)  How to detect when a page becomes dirty?
-    when we get a segfault with code SEGV_ACCERR, then we 
-    read the state of the page and we see that it has permission of read,
+    when we get a SEGV_ACCERR, then we 
+    read the state of the page and we see that it has permission of READ,
     implying that we need more than just read, we need write, which means
     once we grant write privileges, the page will become dirty since we 
-    will proceed to write.
+    will proceed to write. So we set (READ -> RDWR) and set the dirty
+    bit so we know it has been modified.
 
 f)  Page-load rate of "test_matrix -m 1024 1000" using RANDOM policy:
     
@@ -110,11 +111,16 @@ Total page loads:  10087
 
 Total page loads:  6825
 
+Note we don't see a trend for number of page loads and number of bits used
+that makes sense, this implies that page loads with the aging eviction
+policy used in this current matrix multiplication application isn't entirely
+suitable.
+
 Lastly, we also use a queue (plus modification to queuenode to store a timebit)
 to store all the pages, even though this isn't
 the most stylistically beautiful way to do it, I talked with a TA and he 
 said it was fine if I used it this way since the alternate way was to
-implement another structure with repeated code. In a real world 
+implement another structure with repeated code). In a real world 
 scenario we would have access to a generic queue which we can simply
 use a different queuenode type, and since this is not the focus of the
 assignment it is stylistically fine.

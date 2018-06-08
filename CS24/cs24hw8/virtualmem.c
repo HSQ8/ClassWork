@@ -558,11 +558,12 @@ void unmap_page(page_t page) {
      * Finally, the page's Page Table Entry should be cleared.
      */
     
-    /* Set permissions so we can read and write as needed. */
-    set_page_permission(page, PAGEPERM_RDWR);
     
     /* If file has been modified, we must write back into swap. */
     if (is_page_dirty(page)) {
+        /* Set permissions so we can read and write as needed. */
+        set_page_permission(page, PAGEPERM_RDWR);
+        
         /* Must save page back into swap file */
         /* Seek the pointer into our buffer. */
         off_t lseek_ret = lseek(fd_swapfile, page * PAGE_SIZE, SEEK_SET);
